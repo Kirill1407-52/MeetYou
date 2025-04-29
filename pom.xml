@@ -12,11 +12,11 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.example</groupId>
-    <artifactId>demo1</artifactId>
+    <groupId>com.kirill</groupId>
+    <artifactId>meetyou</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>demo1</name>
-    <description>demo1</description>
+    <name>meetyou</name>
+    <description>MeetYou</description>
 
     <properties>
         <java.version>17</java.version>
@@ -76,6 +76,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.kirill.meetyou.MeetYou2Application</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
