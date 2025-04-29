@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Cache {
+public class UserCache {
     private final Map<Long, User> cache = new ConcurrentHashMap<>();
 
     public User get(Long id) {

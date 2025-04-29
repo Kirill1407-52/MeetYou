@@ -1,6 +1,6 @@
 package com.kirill.meetyou.service;
 
-import com.kirill.meetyou.cache.Cache;
+import com.kirill.meetyou.cache.UserCache;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.Repository;
 import java.time.LocalDate;
@@ -14,9 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 @org.springframework.stereotype.Service
 public class Service {
     private final Repository repository;
-    private final Cache cache;
+    private final UserCache cache;
 
-    public Service(Repository repository, Cache cache) {
+    public Service(Repository repository, UserCache cache) {
         this.repository = repository;
         this.cache = cache;
     }
