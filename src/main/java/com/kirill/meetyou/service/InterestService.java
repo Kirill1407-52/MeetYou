@@ -25,7 +25,8 @@ public class InterestService {
                 .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
         Interest interest = interestRepository.findByInterestType(interestType)
-                .orElseGet(() -> createNewInterestNonTransactional(interestType)); // Вызываем напрямую
+                .orElseGet(() ->
+                        createNewInterestNonTransactional(interestType)); // Вызываем напрямую
 
         user.getInterests().add(interest);
         repository.save(user);
