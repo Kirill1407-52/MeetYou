@@ -25,18 +25,16 @@ public class InterestService {
                 .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
         Interest interest = interestRepository.findByInterestType(interestType)
-                .orElseGet(() -> createNewInterest(interestType));
+                .orElseGet(() -> createNewInterestNonTransactional(interestType)); // Вызываем напрямую
 
         user.getInterests().add(interest);
         repository.save(user);
     }
 
-    @Transactional
-    public Interest createNewInterest(String interestType) {
+    private Interest createNewInterestNonTransactional(String interestType) {
         if (interestRepository.existsByInterestType(interestType)) {
             throw new IllegalArgumentException(INTEREST_ALREADY_EXISTS);
         }
-
         Interest newInterest = new Interest();
         newInterest.setInterestType(interestType.trim());
         return interestRepository.save(newInterest);
