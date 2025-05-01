@@ -6,7 +6,6 @@ import com.kirill.meetyou.repository.InterestRepository;
 import com.kirill.meetyou.repository.Repository;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,16 +18,14 @@ public class InterestService {
 
     private final Repository repository;
     private final InterestRepository interestRepository;
-    @Lazy
-    private final InterestService self; // Injected self-reference
 
     @Transactional
     public void addInterestToUser(Long userId, String interestType) {
         User user = repository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
-        // Call via self proxy
-        Interest interest = self.getOrCreateInterest(interestType);
+        Interest interest = interestRepository.findByInterestType(interestType)
+                .orElseGet(() -> createNewInterest(interestType));
 
         user.getInterests().add(interest);
         repository.save(user);
@@ -43,12 +40,6 @@ public class InterestService {
         Interest newInterest = new Interest();
         newInterest.setInterestType(interestType.trim());
         return interestRepository.save(newInterest);
-    }
-
-    @Transactional
-    protected Interest getOrCreateInterest(String interestType) {
-        return interestRepository.findByInterestType(interestType)
-                .orElseGet(() -> self.createNewInterest(interestType));
     }
 
     @Transactional
