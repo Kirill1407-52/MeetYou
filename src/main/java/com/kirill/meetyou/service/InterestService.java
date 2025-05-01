@@ -6,22 +6,29 @@ import com.kirill.meetyou.repository.InterestRepository;
 import com.kirill.meetyou.repository.Repository;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class InterestService {
+    private static final String USER_NOT_FOUND = "User not found";
+    private static final String INTEREST_ALREADY_EXISTS = "Interest already exists";
+    private static final String INTEREST_NOT_FOUND = "Interest not found";
+
     private final Repository repository;
     private final InterestRepository interestRepository;
+    @Lazy
+    private final InterestService self; // Injected self-reference
 
     @Transactional
     public void addInterestToUser(Long userId, String interestType) {
         User user = repository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
-        Interest interest = interestRepository.findByInterestType(interestType)
-                .orElseGet(() -> createNewInterest(interestType));
+        // Call via self proxy
+        Interest interest = self.getOrCreateInterest(interestType);
 
         user.getInterests().add(interest);
         repository.save(user);
@@ -30,7 +37,7 @@ public class InterestService {
     @Transactional
     public Interest createNewInterest(String interestType) {
         if (interestRepository.existsByInterestType(interestType)) {
-            throw new IllegalArgumentException("Interest already exists");
+            throw new IllegalArgumentException(INTEREST_ALREADY_EXISTS);
         }
 
         Interest newInterest = new Interest();
@@ -39,12 +46,18 @@ public class InterestService {
     }
 
     @Transactional
-    public void removeInterestFromUser(Long userId, String interestName) { // Изменили параметр
+    protected Interest getOrCreateInterest(String interestType) {
+        return interestRepository.findByInterestType(interestType)
+                .orElseGet(() -> self.createNewInterest(interestType));
+    }
+
+    @Transactional
+    public void removeInterestFromUser(Long userId, String interestName) {
         User user = repository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
         Interest interest = interestRepository.findByInterestType(interestName)
-                .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
+                .orElseThrow(() -> new IllegalArgumentException(INTEREST_NOT_FOUND));
 
         user.getInterests().remove(interest);
         repository.save(user);
@@ -53,7 +66,7 @@ public class InterestService {
     @Transactional(readOnly = true)
     public Set<Interest> getUserInterests(Long userId) {
         User user = repository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
         return user.getInterests();
     }
 }
