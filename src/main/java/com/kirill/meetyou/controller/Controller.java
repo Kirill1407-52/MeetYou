@@ -1,6 +1,5 @@
 package com.kirill.meetyou.controller;
 
-import com.kirill.meetyou.model.Interest;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.Repository;
 import com.kirill.meetyou.service.Service;
@@ -62,31 +61,32 @@ public class Controller {
         return ResponseEntity.ok().build();
     }
 
+    // Обновленные методы для работы с интересами (теперь через String)
     @GetMapping("/by-interest")
     public ResponseEntity<List<User>> getUsersByInterest(
-            @RequestParam Interest.InterestType interest) {
-        return ResponseEntity.ok(repository.findUsersByInterestType(interest));
+            @RequestParam String interestType) {
+        return ResponseEntity.ok(repository.findUsersByInterestType(interestType));
     }
 
     @GetMapping("/by-all-interests")
     public ResponseEntity<List<User>> getUsersByAllInterests(
-            @RequestParam Set<Interest.InterestType> interests) {
-        if (interests == null || interests.isEmpty()) {
+            @RequestParam Set<String> interestTypes) {
+        if (interestTypes == null || interestTypes.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Не указаны интересы для поиска");
         }
-        return ResponseEntity.ok(repository.findUsersByAllInterestTypes(interests,
-                interests.size()));
+        return ResponseEntity.ok(repository.findUsersByAllInterestTypes(interestTypes,
+                interestTypes.size()));
     }
 
     @GetMapping("/by-any-interest")
     public ResponseEntity<List<User>> getUsersByAnyInterest(
-            @RequestParam Set<Interest.InterestType> interests) {
-        if (interests == null || interests.isEmpty()) {
+            @RequestParam Set<String> interestTypes) {
+        if (interestTypes == null || interestTypes.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Не указаны интересы для поиска");
         }
-        return ResponseEntity.ok(repository.findUsersByAnyInterestTypes(interests));
+        return ResponseEntity.ok(repository.findUsersByAnyInterestTypes(interestTypes));
     }
 
     @ExceptionHandler(ResponseStatusException.class)

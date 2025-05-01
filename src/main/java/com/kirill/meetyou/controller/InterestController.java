@@ -21,19 +21,19 @@ public class InterestController {
     @PostMapping
     public void addInterest(
             @PathVariable Long userId,
-            @RequestParam Interest.InterestType interestType) {
-        interestService.addInterestToUser(userId, interestType);
-    }
-
-    @GetMapping
-    public Set<Interest> getUserInterests(@PathVariable Long userId) {
-        return interestService.getUserInterests(userId);
+            @RequestParam String interestName) {
+        interestService.addInterestToUser(userId, interestName);
     }
 
     @DeleteMapping
     public void removeInterest(
             @PathVariable Long userId,
-            @RequestParam Interest.InterestType interestType) {
-        interestService.removeInterestFromUser(userId, interestType);
+            @RequestParam String interestName) { // Изменили параметр
+        interestService.removeInterestFromUser(userId, interestName);
+    }
+
+    @GetMapping
+    public Set<Interest> getUserInterests(@PathVariable Long userId) {
+        return interestService.getUserInterests(userId);
     }
 }

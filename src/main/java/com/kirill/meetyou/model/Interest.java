@@ -3,8 +3,6 @@ package com.kirill.meetyou.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,26 +22,10 @@ public class Interest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(unique = true, nullable = false)
-    private InterestType interestType;
+    @Column(name = "interest_type", unique = true, nullable = false)
+    private String interestType;
 
     @ManyToMany(mappedBy = "interests")
     @JsonBackReference
     private Set<User> users = new HashSet<>();
-
-    public enum InterestType {
-        NATURE,
-        HOOKAH,
-        BAR,
-        CLUB,
-        MUSEUM,
-        EXCURSIONS,
-        BOOKS,
-        SPORTS,
-        CHESS,
-        TRAVEL
-    }
-
-    // Конструкторы, геттеры и сеттеры генерируются через Lombok
 }

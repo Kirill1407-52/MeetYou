@@ -93,7 +93,4 @@ public class User {
         friend.getFriendOf().remove(this);
     }
 
-    public boolean isFriendWith(User user) {
-        return this.friends.contains(user);
-    }
 }
