@@ -2,7 +2,7 @@ package com.kirill.meetyou.service;
 
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.FriendRepository;
-import com.kirill.meetyou.repository.Repository;
+import com.kirill.meetyou.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ public class FriendService {
     private static final String USER_WITH_ID_TEXT = "User with id ";
     private static final String NOT_FOUND_TEXT = " not found";
 
-    private final Repository userRepository;
+    private final UserRepository userRepository;
     private final FriendRepository friendRepository;
 
     public void addFriend(Long userId, Long friendId) {

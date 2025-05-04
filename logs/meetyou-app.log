@@ -1,0 +1,226 @@
+2025-05-05 00:03:59.611 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-05 00:03:59.647 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-05-05 00:03:59.669 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 00:03:59.693 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-05-05 00:03:59.764 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-05-05 00:05:05.008 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-05-05 00:05:05.220 [main] INFO  c.kirill.meetyou.MeetYou2Application - Starting MeetYou2Application using Java 21.0.7 with PID 20961 (/home/kirill/Java/MeetYou2/target/classes started by kirill in /home/kirill/Java/MeetYou2)
+2025-05-05 00:05:05.223 [main] INFO  c.kirill.meetyou.MeetYou2Application - No active profile set, falling back to 1 default profile: "default"
+2025-05-05 00:05:07.866 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-05 00:05:08.078 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 189 ms. Found 5 JPA repository interfaces.
+2025-05-05 00:05:10.254 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-05-05 00:05:10.287 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-05-05 00:05:10.291 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-05-05 00:05:10.292 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-05-05 00:05:10.401 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-05-05 00:05:10.402 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5012 ms
+2025-05-05 00:05:10.918 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-05 00:05:11.030 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-05-05 00:05:11.107 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-05-05 00:05:11.671 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-05 00:05:11.725 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-05-05 00:05:12.331 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3d7b3b18
+2025-05-05 00:05:12.335 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-05-05 00:05:12.387 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-05-05 00:05:12.419 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-05-05 00:05:14.741 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-05 00:05:14.819 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 00:05:15.910 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-05-05 00:05:18.162 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-05 00:05:19.710 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-05-05 00:05:19.733 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-05-05 00:05:19.751 [main] INFO  c.kirill.meetyou.MeetYou2Application - Started MeetYou2Application in 16.144 seconds (process running for 18.689)
+2025-05-05 00:06:43.168 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-05 00:06:43.168 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-05-05 00:06:43.174 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 6 ms
+2025-05-05 00:06:46.890 [http-nio-8080-exec-4] INFO  o.s.api.AbstractOpenApiResource - Init duration for springdoc-openapi is: 2210 ms
+2025-05-05 00:07:35.329 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: LogController.downloadLog(..) with args: [2025-05-04]
+2025-05-05 00:07:35.332 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method LogController.downloadLog(..) returned: <200 OK OK,URL [file:///home/kirill/Java/MeetYou2/./logs/meetyou-app.log],[Content-Type:"application/octet-stream", Content-Disposition:"attachment; filename=meetyou-app-2025-05-04.log"]>
+2025-05-05 00:17:50.263 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-05 00:17:50.274 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-05-05 00:17:50.288 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 00:17:50.295 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-05-05 00:17:50.370 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-05-05 00:19:23.575 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-05-05 00:19:23.835 [main] INFO  c.kirill.meetyou.MeetYou2Application - Starting MeetYou2Application using Java 21.0.7 with PID 22472 (/home/kirill/Java/MeetYou2/target/classes started by kirill in /home/kirill/Java/MeetYou2)
+2025-05-05 00:19:23.839 [main] INFO  c.kirill.meetyou.MeetYou2Application - No active profile set, falling back to 1 default profile: "default"
+2025-05-05 00:19:27.416 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-05 00:19:27.647 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 201 ms. Found 5 JPA repository interfaces.
+2025-05-05 00:19:29.814 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-05-05 00:19:29.846 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-05-05 00:19:29.850 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-05-05 00:19:29.850 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-05-05 00:19:29.941 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-05-05 00:19:29.942 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5755 ms
+2025-05-05 00:19:30.337 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-05 00:19:30.460 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-05-05 00:19:30.568 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-05-05 00:19:31.112 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-05 00:19:31.171 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-05-05 00:19:31.781 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6a0c7af6
+2025-05-05 00:19:31.784 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-05-05 00:19:31.851 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-05-05 00:19:31.885 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-05-05 00:19:34.165 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-05 00:19:34.267 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 00:19:35.318 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-05-05 00:19:37.610 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-05 00:19:39.225 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-05-05 00:19:39.247 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-05-05 00:19:39.263 [main] INFO  c.kirill.meetyou.MeetYou2Application - Started MeetYou2Application in 17.519 seconds (process running for 19.952)
+2025-05-05 00:20:24.231 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-05 00:20:24.233 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-05-05 00:20:24.236 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2025-05-05 00:20:27.721 [http-nio-8080-exec-4] INFO  o.s.api.AbstractOpenApiResource - Init duration for springdoc-openapi is: 2094 ms
+2025-05-05 00:21:07.443 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: LogController.downloadLog(..) with args: [2025-05-04]
+2025-05-05 00:21:07.446 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method LogController.downloadLog(..) returned: <200 OK OK,URL [file:///home/kirill/Java/MeetYou2/./logs/meetyou-app.log],[Content-Type:"application/octet-stream", Content-Disposition:"attachment; filename=meetyou-app-2025-05-04.log"]>
+2025-05-05 00:23:11.813 [http-nio-8080-exec-7] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: BioController.createUserBio(..) with args: [1, BioDto.CreateRequest(bio=Я люблю всех людей, interestFact=Даже баскетбол)]
+2025-05-05 00:23:11.868 [http-nio-8080-exec-7] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: BioService.createUserBio(..) with args: [1, BioDto.CreateRequest(bio=Я люблю всех людей, interestFact=Даже баскетбол)]
+2025-05-05 00:23:11.961 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.age,
+        b1_0.id,
+        b1_0.interest_fact,
+        b1_0.user_id,
+        b1_0.bio,
+        u1_0.birth,
+        u1_0.email,
+        u1_0.name 
+    from
+        users u1_0 
+    left join
+        bio b1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=?
+2025-05-05 00:23:12.263 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        b1_0.id 
+    from
+        bio b1_0 
+    left join
+        users u1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=? 
+    fetch
+        first ? rows only
+2025-05-05 00:23:12.308 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bio
+        (interest_fact, user_id, bio) 
+    values
+        (?, ?, ?)
+2025-05-05 00:23:12.339 [http-nio-8080-exec-7] DEBUG c.k.meetyou.aspect.LoggingAspect - Method BioService.createUserBio(..) returned: BioDto.Response(bio=Я люблю всех людей, interestFact=Даже баскетбол)
+2025-05-05 00:23:12.348 [http-nio-8080-exec-7] DEBUG c.k.meetyou.aspect.LoggingAspect - Method BioController.createUserBio(..) returned: <201 CREATED Created,BioDto.Response(bio=Я люблю всех людей, interestFact=Даже баскетбол),[]>
+2025-05-05 00:23:44.471 [http-nio-8080-exec-8] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: LogController.downloadLog(..) with args: [2025-05-05]
+2025-05-05 00:23:44.473 [http-nio-8080-exec-8] DEBUG c.k.meetyou.aspect.LoggingAspect - Method LogController.downloadLog(..) returned: <200 OK OK,URL [file:///home/kirill/Java/MeetYou2/./logs/meetyou-app.log],[Content-Type:"application/octet-stream", Content-Disposition:"attachment; filename=meetyou-app-2025-05-05.log"]>
+2025-05-05 00:47:26.416 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-05 00:47:26.428 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-05-05 00:47:26.446 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 00:47:26.455 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-05-05 00:47:26.519 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-05-05 00:48:25.797 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-05-05 00:48:25.986 [main] INFO  c.kirill.meetyou.MeetYou2Application - Starting MeetYou2Application using Java 21.0.7 with PID 24301 (/home/kirill/Java/MeetYou2/target/classes started by kirill in /home/kirill/Java/MeetYou2)
+2025-05-05 00:48:25.990 [main] INFO  c.kirill.meetyou.MeetYou2Application - No active profile set, falling back to 1 default profile: "default"
+2025-05-05 00:48:29.315 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-05 00:48:29.501 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 161 ms. Found 5 JPA repository interfaces.
+2025-05-05 00:48:31.630 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-05-05 00:48:31.662 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-05-05 00:48:31.666 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-05-05 00:48:31.669 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-05-05 00:48:31.817 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-05-05 00:48:31.818 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5644 ms
+2025-05-05 00:48:32.346 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-05 00:48:32.427 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-05-05 00:48:32.487 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-05-05 00:48:33.195 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-05 00:48:33.254 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-05-05 00:48:33.837 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@268f0ff3
+2025-05-05 00:48:33.840 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-05-05 00:48:33.888 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-05-05 00:48:33.921 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-05-05 00:48:36.495 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-05 00:48:36.583 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 00:48:38.158 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-05-05 00:48:41.211 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-05 00:48:42.796 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-05-05 00:48:42.820 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-05-05 00:48:42.836 [main] INFO  c.kirill.meetyou.MeetYou2Application - Started MeetYou2Application in 18.664 seconds (process running for 21.038)
+2025-05-05 00:49:32.573 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-05 00:49:32.581 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-05-05 00:49:32.596 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 12 ms
+2025-05-05 00:49:39.785 [http-nio-8080-exec-4] INFO  o.s.api.AbstractOpenApiResource - Init duration for springdoc-openapi is: 3726 ms
+2025-05-05 00:50:34.411 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: BioController.createUserBio(..) with args: [4, BioDto.CreateRequest(bio=string, interestFact=string)]
+2025-05-05 00:50:34.426 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: BioService.createUserBio(..) with args: [4, BioDto.CreateRequest(bio=string, interestFact=string)]
+2025-05-05 00:50:34.503 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.age,
+        b1_0.id,
+        b1_0.interest_fact,
+        b1_0.user_id,
+        b1_0.bio,
+        u1_0.birth,
+        u1_0.email,
+        u1_0.name 
+    from
+        users u1_0 
+    left join
+        bio b1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=?
+2025-05-05 00:50:34.770 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - 
+    select
+        b1_0.id 
+    from
+        bio b1_0 
+    left join
+        users u1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=? 
+    fetch
+        first ? rows only
+2025-05-05 00:50:34.811 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bio
+        (interest_fact, user_id, bio) 
+    values
+        (?, ?, ?)
+2025-05-05 00:50:34.840 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method BioService.createUserBio(..) returned: BioDto.Response(bio=string, interestFact=string)
+2025-05-05 00:50:34.849 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method BioController.createUserBio(..) returned: <201 CREATED Created,BioDto.Response(bio=string, interestFact=string),[]>
+2025-05-05 00:51:06.913 [http-nio-8080-exec-6] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: LogController.downloadLog(..) with args: [2025-05-05]
+2025-05-05 00:51:06.915 [http-nio-8080-exec-6] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: LogService.getLogFileByDate(..) with args: [2025-05-05]
+2025-05-05 00:51:06.919 [http-nio-8080-exec-6] DEBUG c.k.meetyou.aspect.LoggingAspect - Method LogService.getLogFileByDate(..) returned: URL [file:///home/kirill/Java/MeetYou2/./logs/meetyou-app.log]
+2025-05-05 00:51:06.919 [http-nio-8080-exec-6] DEBUG c.k.meetyou.aspect.LoggingAspect - Method LogController.downloadLog(..) returned: <200 OK OK,URL [file:///home/kirill/Java/MeetYou2/./logs/meetyou-app.log],[Content-Type:"application/octet-stream", Content-Disposition:"attachment; filename=meetyou-app-2025-05-05.log"]>
+2025-05-05 00:56:15.495 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-05 00:56:15.503 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-05-05 00:56:15.522 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 00:56:15.530 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-05-05 00:56:15.584 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

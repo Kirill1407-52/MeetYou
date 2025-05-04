@@ -9,7 +9,7 @@ import com.kirill.meetyou.exception.ResourceNotFoundException;
 import com.kirill.meetyou.model.Bio;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.BioRepository;
-import com.kirill.meetyou.repository.Repository;
+import com.kirill.meetyou.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +21,7 @@ public class BioService {
     private static final String BIO_NOT_FOUND_TEXT = "Bio not found ";
 
     private final BioRepository bioRepository;
-    private final Repository repository;
+    private final UserRepository userRepository;
 
     @Transactional
     public Response createUserBio(Long userId, CreateRequest request) {
@@ -30,7 +30,7 @@ public class BioService {
         }
 
         User user;
-        user = repository.findById(userId)
+        user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not "
                         + "found with id: " + userId));
 

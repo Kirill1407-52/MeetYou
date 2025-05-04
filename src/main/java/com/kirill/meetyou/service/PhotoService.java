@@ -4,7 +4,7 @@ import com.kirill.meetyou.exception.ResourceNotFoundException;
 import com.kirill.meetyou.model.Photo;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.PhotoRepository;
-import com.kirill.meetyou.repository.Repository;
+import com.kirill.meetyou.repository.UserRepository;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PhotoService {
     private final PhotoRepository photoRepository;
-    private final Repository repository;
+    private final UserRepository userRepository;
 
     @Transactional
     public Photo addPhoto(Long userId, Photo photo) {
-        User user = repository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if ("true".equals(photo.getIsMainString())) {
@@ -77,7 +77,7 @@ public class PhotoService {
 
     @Transactional
     public List<Photo> addMultiplePhotos(Long userId, List<Photo> photos) {
-        User user = repository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         boolean hasMainPhoto = photos.stream()

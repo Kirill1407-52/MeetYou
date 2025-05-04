@@ -3,7 +3,7 @@ package com.kirill.meetyou.service;
 import com.kirill.meetyou.model.Interest;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.InterestRepository;
-import com.kirill.meetyou.repository.Repository;
+import com.kirill.meetyou.repository.UserRepository;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,12 +16,12 @@ public class InterestService {
     private static final String INTEREST_ALREADY_EXISTS = "Interest already exists";
     private static final String INTEREST_NOT_FOUND = "Interest not found";
 
-    private final Repository repository;
+    private final UserRepository userRepository;
     private final InterestRepository interestRepository;
 
     @Transactional
     public void addInterestToUser(Long userId, String interestType) {
-        User user = repository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
         Interest interest = interestRepository.findByInterestType(interestType)
@@ -29,7 +29,7 @@ public class InterestService {
                         createNewInterestNonTransactional(interestType)); // Вызываем напрямую
 
         user.getInterests().add(interest);
-        repository.save(user);
+        userRepository.save(user);
     }
 
     private Interest createNewInterestNonTransactional(String interestType) {
@@ -43,19 +43,19 @@ public class InterestService {
 
     @Transactional
     public void removeInterestFromUser(Long userId, String interestName) {
-        User user = repository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
         Interest interest = interestRepository.findByInterestType(interestName)
                 .orElseThrow(() -> new IllegalArgumentException(INTEREST_NOT_FOUND));
 
         user.getInterests().remove(interest);
-        repository.save(user);
+        userRepository.save(user);
     }
 
     @Transactional(readOnly = true)
     public Set<Interest> getUserInterests(Long userId) {
-        User user = repository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
         return user.getInterests();
     }
