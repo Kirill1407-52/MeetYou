@@ -690,3 +690,317 @@
 2025-05-05 11:18:11.892 [http-nio-8080-exec-1] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserService.findById(..) with args: [3]
 2025-05-05 11:18:11.892 [http-nio-8080-exec-1] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserService.findById(..) returned: Optional[User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19}]
 2025-05-05 11:18:11.893 [http-nio-8080-exec-1] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserController.getById(..) returned: <200 OK OK,User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19},[]>
+2025-05-05 11:37:40.448 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-05 11:37:40.455 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-05-05 11:37:40.471 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 11:37:40.475 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-05-05 11:37:40.542 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-05-05 11:38:05.212 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-05-05 11:38:05.478 [main] INFO  c.kirill.meetyou.MeetYou2Application - Starting MeetYou2Application using Java 21.0.7 with PID 11124 (/home/kirill/Java/MeetYou2/target/classes started by kirill in /home/kirill/Java/MeetYou2)
+2025-05-05 11:38:05.484 [main] INFO  c.kirill.meetyou.MeetYou2Application - No active profile set, falling back to 1 default profile: "default"
+2025-05-05 11:38:07.987 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-05 11:38:08.162 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 152 ms. Found 5 JPA repository interfaces.
+2025-05-05 11:38:10.294 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-05-05 11:38:10.327 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-05-05 11:38:10.331 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-05-05 11:38:10.332 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-05-05 11:38:10.449 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-05-05 11:38:10.450 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 4837 ms
+2025-05-05 11:38:10.977 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-05 11:38:11.127 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-05-05 11:38:11.231 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-05-05 11:38:11.877 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-05 11:38:11.930 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-05-05 11:38:12.526 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@be1c08a
+2025-05-05 11:38:12.530 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-05-05 11:38:12.577 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-05-05 11:38:12.609 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-05-05 11:38:14.879 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-05 11:38:14.965 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 11:38:16.057 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-05-05 11:38:19.014 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-05 11:38:20.673 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-05-05 11:38:20.695 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-05-05 11:38:20.711 [main] INFO  c.kirill.meetyou.MeetYou2Application - Started MeetYou2Application in 17.173 seconds (process running for 19.819)
+2025-05-05 11:38:33.638 [http-nio-8080-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-05 11:38:33.639 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-05-05 11:38:33.642 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2025-05-05 11:38:33.773 [http-nio-8080-exec-2] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserController.getById(..) with args: [3]
+2025-05-05 11:38:33.774 [http-nio-8080-exec-2] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserService.findById(..) with args: [3]
+2025-05-05 11:38:33.937 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.age,
+        b1_0.id,
+        b1_0.interest_fact,
+        b1_0.user_id,
+        b1_0.bio,
+        u1_0.birth,
+        u1_0.email,
+        u1_0.name 
+    from
+        users u1_0 
+    left join
+        bio b1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=?
+2025-05-05 11:38:34.074 [http-nio-8080-exec-2] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserService.findById(..) returned: Optional[User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19}]
+2025-05-05 11:38:34.086 [http-nio-8080-exec-2] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserController.getById(..) returned: <200 OK OK,User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19},[]>
+2025-05-05 11:38:34.374 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        i1_0.user_id,
+        i1_1.id,
+        i1_1.interest_type 
+    from
+        user_interest i1_0 
+    join
+        interests i1_1 
+            on i1_1.id=i1_0.interest_id 
+    where
+        i1_0.user_id=?
+2025-05-05 11:38:37.271 [http-nio-8080-exec-3] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserController.getById(..) with args: [3]
+2025-05-05 11:38:37.272 [http-nio-8080-exec-3] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserService.findById(..) with args: [3]
+2025-05-05 11:38:37.273 [http-nio-8080-exec-3] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserService.findById(..) returned: Optional[User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19}]
+2025-05-05 11:38:37.273 [http-nio-8080-exec-3] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserController.getById(..) returned: <200 OK OK,User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19},[]>
+2025-05-05 11:39:02.219 [http-nio-8080-exec-4] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: BioController.createUserBio(..) with args: [3, BioDto.CreateRequest(bio=Я люблю девушек., interestFact=А больше я тебе ничего не скажу...)]
+2025-05-05 11:39:02.230 [http-nio-8080-exec-4] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: BioService.createUserBio(..) with args: [3, BioDto.CreateRequest(bio=Я люблю девушек., interestFact=А больше я тебе ничего не скажу...)]
+2025-05-05 11:39:02.234 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.age,
+        b1_0.id,
+        b1_0.interest_fact,
+        b1_0.user_id,
+        b1_0.bio,
+        u1_0.birth,
+        u1_0.email,
+        u1_0.name 
+    from
+        users u1_0 
+    left join
+        bio b1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=?
+2025-05-05 11:39:02.508 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - 
+    select
+        b1_0.id 
+    from
+        bio b1_0 
+    left join
+        users u1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=? 
+    fetch
+        first ? rows only
+2025-05-05 11:39:02.536 [http-nio-8080-exec-4] ERROR c.k.m.aspect.ErrorHandlingAspect - Exception in com.kirill.meetyou.service.BioService.createUserBio() with cause = NULL
+2025-05-05 11:39:02.558 [http-nio-8080-exec-4] ERROR c.k.m.aspect.ErrorHandlingAspect - Exception in com.kirill.meetyou.controller.BioController.createUserBio() with cause = NULL
+2025-05-05 11:39:31.332 [http-nio-8080-exec-6] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: InterestController.addInterest(..) with args: [3, FOOTBALL]
+2025-05-05 11:39:31.335 [http-nio-8080-exec-6] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: InterestService.addInterestToUser(..) with args: [3, FOOTBALL]
+2025-05-05 11:39:31.340 [http-nio-8080-exec-6] INFO  c.k.meetyou.service.InterestService - Добавление интереса 'FOOTBALL' пользователю 3
+2025-05-05 11:39:31.348 [http-nio-8080-exec-6] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.age,
+        b1_0.id,
+        b1_0.interest_fact,
+        b1_0.user_id,
+        b1_0.bio,
+        u1_0.birth,
+        u1_0.email,
+        u1_0.name 
+    from
+        users u1_0 
+    left join
+        bio b1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=?
+2025-05-05 11:39:31.382 [http-nio-8080-exec-6] DEBUG org.hibernate.SQL - 
+    select
+        i1_0.id,
+        i1_0.interest_type 
+    from
+        interests i1_0 
+    where
+        i1_0.interest_type=?
+2025-05-05 11:39:31.410 [http-nio-8080-exec-6] DEBUG org.hibernate.SQL - 
+    select
+        i1_0.user_id,
+        i1_1.id,
+        i1_1.interest_type 
+    from
+        user_interest i1_0 
+    join
+        interests i1_1 
+            on i1_1.id=i1_0.interest_id 
+    where
+        i1_0.user_id=?
+2025-05-05 11:39:31.417 [http-nio-8080-exec-6] WARN  c.k.meetyou.service.InterestService - Попытка добавить существующий интерес: FOOTBALL
+2025-05-05 11:39:31.420 [http-nio-8080-exec-6] ERROR c.k.m.aspect.ErrorHandlingAspect - Exception in com.kirill.meetyou.service.InterestService.addInterestToUser() with cause = NULL
+2025-05-05 11:39:31.422 [http-nio-8080-exec-6] ERROR c.k.m.aspect.ErrorHandlingAspect - Exception in com.kirill.meetyou.controller.InterestController.addInterest() with cause = NULL
+2025-05-05 11:39:31.425 [http-nio-8080-exec-6] ERROR c.k.m.e.GlobalExceptionHandler - Unhandled exception occurred: 400 BAD_REQUEST "У пользователя уже есть этот интерес"
+org.springframework.web.server.ResponseStatusException: 400 BAD_REQUEST "У пользователя уже есть этот интерес"
+	at com.kirill.meetyou.service.InterestService.addInterestToUser(InterestService.java:42)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.adapter.AfterReturningAdviceInterceptor.invoke(AfterReturningAdviceInterceptor.java:57)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor.invoke(MethodBeforeAdviceInterceptor.java:58)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.aspectj.AspectJAfterThrowingAdvice.invoke(AspectJAfterThrowingAdvice.java:64)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:380)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:727)
+	at com.kirill.meetyou.service.InterestService$$SpringCGLIB$$0.addInterestToUser(<generated>)
+	at com.kirill.meetyou.controller.InterestController.addInterest(InterestController.java:25)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.adapter.AfterReturningAdviceInterceptor.invoke(AfterReturningAdviceInterceptor.java:57)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor.invoke(MethodBeforeAdviceInterceptor.java:58)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.aspectj.AspectJAfterThrowingAdvice.invoke(AspectJAfterThrowingAdvice.java:64)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:727)
+	at com.kirill.meetyou.controller.InterestController$$SpringCGLIB$$0.addInterest(<generated>)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-05-05 11:40:05.811 [http-nio-8080-exec-7] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: InterestController.addInterest(..) with args: [3, BARR]
+2025-05-05 11:40:05.814 [http-nio-8080-exec-7] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: InterestService.addInterestToUser(..) with args: [3, BARR]
+2025-05-05 11:40:05.814 [http-nio-8080-exec-7] INFO  c.k.meetyou.service.InterestService - Добавление интереса 'BARR' пользователю 3
+2025-05-05 11:40:05.816 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.age,
+        b1_0.id,
+        b1_0.interest_fact,
+        b1_0.user_id,
+        b1_0.bio,
+        u1_0.birth,
+        u1_0.email,
+        u1_0.name 
+    from
+        users u1_0 
+    left join
+        bio b1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=?
+2025-05-05 11:40:05.830 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        i1_0.id,
+        i1_0.interest_type 
+    from
+        interests i1_0 
+    where
+        i1_0.interest_type=?
+2025-05-05 11:40:05.844 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        i1_0.id 
+    from
+        interests i1_0 
+    where
+        i1_0.interest_type=? 
+    fetch
+        first ? rows only
+2025-05-05 11:40:05.892 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        interests
+        (interest_type) 
+    values
+        (?)
+2025-05-05 11:40:05.935 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    select
+        i1_0.user_id,
+        i1_1.id,
+        i1_1.interest_type 
+    from
+        user_interest i1_0 
+    join
+        interests i1_1 
+            on i1_1.id=i1_0.interest_id 
+    where
+        i1_0.user_id=?
+2025-05-05 11:40:05.946 [http-nio-8080-exec-7] INFO  c.k.meetyou.service.InterestService - Интерес 'BARR' добавлен пользователю 3
+2025-05-05 11:40:05.946 [http-nio-8080-exec-7] DEBUG c.k.meetyou.aspect.LoggingAspect - Method InterestService.addInterestToUser(..) returned: null
+2025-05-05 11:40:05.970 [http-nio-8080-exec-7] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        user_interest
+        (user_id, interest_id) 
+    values
+        (?, ?)
+2025-05-05 11:40:05.981 [http-nio-8080-exec-7] DEBUG c.k.meetyou.aspect.LoggingAspect - Method InterestController.addInterest(..) returned: null
+2025-05-05 11:40:14.395 [http-nio-8080-exec-9] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserController.getById(..) with args: [3]
+2025-05-05 11:40:14.395 [http-nio-8080-exec-9] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserService.findById(..) with args: [3]
+2025-05-05 11:40:14.396 [http-nio-8080-exec-9] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserService.findById(..) returned: Optional[User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19}]
+2025-05-05 11:40:14.396 [http-nio-8080-exec-9] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserController.getById(..) returned: <200 OK OK,User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19},[]>

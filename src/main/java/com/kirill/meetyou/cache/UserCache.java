@@ -6,45 +6,47 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserCache {
-    private static final int MAX_SIZE = 1000; // Максимальное количество пользователей в кэше
-    private static final long TTL = 30 * 60 * 1000; // 30 минут в миллисекундах
+    private static final int MAX_SIZE = 1000;
+    private static final long TTL = 30 * 60 * 1000; // 30 minutes
+    private static final long USER_SIZE_ESTIMATE = 200L; // ~200 bytes per user
+    private static final long MAX_CACHE_SIZE_BYTES = 500_000_000; // 500MB
 
     private final Map<Long, CacheEntry> cache;
     private long currentCacheSize = 0;
-    private static final long MAX_CACHE_SIZE_BYTES = 500_000_000; // 500MB (примерная оценка)
+    private final ScheduledExecutorService scheduler;
 
     public UserCache() {
-        this.cache = new LinkedHashMap<Long, CacheEntry>(16, 0.75f, true) {
+        this.cache = new LinkedHashMap<>(16, 0.75f, true) {
             @Override
             protected boolean removeEldestEntry(Map.Entry<Long, CacheEntry> eldest) {
                 if (size() > MAX_SIZE || currentCacheSize > MAX_CACHE_SIZE_BYTES) {
-                    currentCacheSize -= estimateSize(eldest.getValue().user);
+                    currentCacheSize -= USER_SIZE_ESTIMATE;
                     return true;
                 }
                 return false;
             }
         };
 
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
         initCleanupTask();
     }
 
     public User get(Long id) {
         synchronized (cache) {
             CacheEntry entry = cache.get(id);
-            if (entry == null) {
+            if (entry == null || entry.isExpired()) {
+                if (entry != null) {
+                    cache.remove(id);
+                    currentCacheSize -= USER_SIZE_ESTIMATE;
+                }
                 return null;
             }
-
-            if (entry.isExpired()) {
-                cache.remove(id);
-                currentCacheSize -= estimateSize(entry.user);
-                return null;
-            }
-
             return entry.user;
         }
     }
@@ -52,11 +54,10 @@ public class UserCache {
     public void put(Long id, User user) {
         synchronized (cache) {
             if (cache.containsKey(id)) {
-                currentCacheSize -= estimateSize(cache.get(id).user);
+                currentCacheSize -= USER_SIZE_ESTIMATE;
             }
-
             cache.put(id, new CacheEntry(user));
-            currentCacheSize += estimateSize(user);
+            currentCacheSize += USER_SIZE_ESTIMATE;
         }
     }
 
@@ -64,37 +65,26 @@ public class UserCache {
         synchronized (cache) {
             CacheEntry removed = cache.remove(id);
             if (removed != null) {
-                currentCacheSize -= estimateSize(removed.user);
+                currentCacheSize -= USER_SIZE_ESTIMATE;
             }
         }
     }
 
-    public boolean contains(Long id) {
-        synchronized (cache) {
-            CacheEntry entry = cache.get(id);
-            if (entry == null) {
-                return false;
+    @PreDestroy
+    public void cleanup() {
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(1, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
             }
-
-            if (entry.isExpired()) {
-                cache.remove(id);
-                currentCacheSize -= estimateSize(entry.user);
-                return false;
-            }
-
-            return true;
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
         }
-    }
-
-    public void clear() {
-        synchronized (cache) {
-            cache.clear();
-            currentCacheSize = 0;
-        }
+        clear();
     }
 
     private void initCleanupTask() {
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(this::clearExpired, TTL, TTL, TimeUnit.MILLISECONDS);
     }
 
@@ -102,7 +92,7 @@ public class UserCache {
         synchronized (cache) {
             cache.entrySet().removeIf(entry -> {
                 if (entry.getValue().isExpired()) {
-                    currentCacheSize -= estimateSize(entry.getValue().user);
+                    currentCacheSize -= USER_SIZE_ESTIMATE;
                     return true;
                 }
                 return false;
@@ -110,13 +100,14 @@ public class UserCache {
         }
     }
 
-    private long estimateSize(User user) {
-        // Примерная оценка размера объекта User в байтах
-        // Можно уточнить на основе реальных данных
-        return 200L; // ~200 байт на пользователя
+    private void clear() {
+        synchronized (cache) {
+            cache.clear();
+            currentCacheSize = 0;
+        }
     }
 
-    private class CacheEntry {
+    private static class CacheEntry {
         final User user;
         final long timestamp;
 
