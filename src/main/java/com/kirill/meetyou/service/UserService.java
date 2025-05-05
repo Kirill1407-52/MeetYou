@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-
 @Slf4j
 @Service
 public class UserService {
@@ -37,43 +36,30 @@ public class UserService {
                     "Некорректный ID пользователя");
         }
 
-        if (cache.contains(id)) {
-            log.debug("Retrieving user {} from cache", id);
-            return Optional.ofNullable(cache.get(id));
+        // Попытка получить из кэша
+        User cachedUser = cache.get(id);
+        if (cachedUser != null) {
+            log.debug("Retrieved user {} FROM CACHE: {}", id, cachedUser);
+            return Optional.of(cachedUser);
         }
 
-        log.debug("Fetching user {} from database", id);
+        log.debug("Fetching user {} FROM DATABASE", id);
         Optional<User> userOptional = userRepository.findById(id);
-        userOptional.ifPresent(user -> {
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
             cache.put(id, user);
-            log.debug("Cached user {}", id);
-        });
+            log.debug("Cached user {}: {}", id, user);
+        } else {
+            log.debug("User {} not found in database", id);
+        }
+
         return userOptional;
     }
 
     public User create(User user) {
         log.info("Creating new user with email: {}", user.getEmail());
 
-        // Проверка email (основная бизнес-логика)
-        if (user.getEmail().isEmpty()) {
-            log.error("Attempt to create user with empty email");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Email пользователя не может быть пустым");
-        }
-
-        // Проверка уникальности email
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            log.warn("Duplicate email attempt: {}", user.getEmail());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Пользователь с таким email уже существует");
-        }
-
-        // Валидация даты рождения
-        if (user.getBirth() == null || user.getBirth().isAfter(LocalDate.now())) {
-            log.warn("Invalid birth date for user: {}", user.getBirth());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Некорректная дата рождения");
-        }
+        validateUserForCreation(user);
 
         user.setAge(Period.between(user.getBirth(), LocalDate.now()).getYears());
         User savedUser = userRepository.save(user);
@@ -86,11 +72,7 @@ public class UserService {
     public void delete(Long id) {
         log.info("Deleting user with ID: {}", id);
 
-        if (id == null || id <= 0) {
-            log.warn("Invalid deletion attempt with ID: {}", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Некорректный ID пользователя");
-        }
+        validateUserId(id);
 
         if (!userRepository.existsById(id)) {
             log.warn("Attempt to delete non-existent user: {}", id);
@@ -103,15 +85,12 @@ public class UserService {
         log.info("Successfully deleted user: {}", id);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     @Transactional
-    public void update(Long id, String email, String name) {
+    public User update(Long id, String email, String name) {
         log.info("Updating user {} with email: {}, name: {}", id, email, name);
 
-        if (id == null || id <= 0) {
-            log.warn("Invalid update attempt with ID: {}", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Некорректный ID пользователя");
-        }
+        validateUserId(id);
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> {
@@ -120,9 +99,49 @@ public class UserService {
                             "Пользователь с id: " + id + " не найден");
                 });
 
+        updateUserEmail(user, email);
+        updateUserName(user, name);
+
+        User updatedUser = userRepository.save(user);
+        cache.put(id, updatedUser);
+        log.info("Successfully updated user: {}", id);
+
+        return updatedUser;
+    }
+
+    // Вспомогательные методы
+    private void validateUserForCreation(User user) {
+        if (user.getEmail().isEmpty()) {
+            log.error("Attempt to create user with empty email");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Email пользователя не может быть пустым");
+        }
+
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            log.warn("Duplicate email attempt: {}", user.getEmail());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Пользователь с таким email уже существует");
+        }
+
+        if (user.getBirth() == null || user.getBirth().isAfter(LocalDate.now())) {
+            log.warn("Invalid birth date for user: {}", user.getBirth());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Некорректная дата рождения");
+        }
+    }
+
+    private void validateUserId(Long id) {
+        if (id == null || id <= 0) {
+            log.warn("Invalid user ID: {}", id);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Некорректный ID пользователя");
+        }
+    }
+
+    private void updateUserEmail(User user, String email) {
         if (email != null && !email.equals(user.getEmail())) {
             if (email.isEmpty()) {
-                log.warn("Attempt to set empty email for user: {}", id);
+                log.warn("Attempt to set empty email for user: {}", user.getId());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Email не может быть пустым");
             }
@@ -132,21 +151,19 @@ public class UserService {
                         "Пользователь с таким email уже существует");
             }
             user.setEmail(email);
-            log.debug("Updated email for user: {}", id);
+            log.debug("Updated email for user: {}", user.getId());
         }
+    }
 
+    private void updateUserName(User user, String name) {
         if (name != null) {
             if (name.isEmpty()) {
-                log.warn("Attempt to set empty name for user: {}", id);
+                log.warn("Attempt to set empty name for user: {}", user.getId());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Имя не может быть пустым");
             }
             user.setName(name);
-            log.debug("Updated name for user: {}", id);
+            log.debug("Updated name for user: {}", user.getId());
         }
-
-        User updatedUser = userRepository.save(user);
-        cache.put(id, updatedUser);
-        log.info("Successfully updated user: {}", id);
     }
 }
