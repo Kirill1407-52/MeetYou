@@ -1,12 +1,11 @@
 package com.kirill.meetyou.cache;
 
+import com.kirill.meetyou.model.User;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import com.kirill.meetyou.model.User;
 import org.springframework.stereotype.Component;
 
 @Component
