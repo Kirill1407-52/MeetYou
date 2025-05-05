@@ -1004,3 +1004,143 @@ org.springframework.web.server.ResponseStatusException: 400 BAD_REQUEST "У по
 2025-05-05 11:40:14.395 [http-nio-8080-exec-9] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserService.findById(..) with args: [3]
 2025-05-05 11:40:14.396 [http-nio-8080-exec-9] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserService.findById(..) returned: Optional[User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19}]
 2025-05-05 11:40:14.396 [http-nio-8080-exec-9] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserController.getById(..) returned: <200 OK OK,User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19},[]>
+2025-05-05 11:57:55.097 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-05 11:57:55.103 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-05-05 11:57:55.115 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 11:57:55.120 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-05-05 11:57:55.156 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-05-05 12:00:30.476 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-05-05 12:00:30.662 [main] INFO  c.kirill.meetyou.MeetYou2Application - Starting MeetYou2Application using Java 21.0.7 with PID 12673 (/home/kirill/Java/MeetYou2/target/classes started by kirill in /home/kirill/Java/MeetYou2)
+2025-05-05 12:00:30.670 [main] INFO  c.kirill.meetyou.MeetYou2Application - No active profile set, falling back to 1 default profile: "default"
+2025-05-05 12:00:33.437 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-05 12:00:33.608 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 149 ms. Found 5 JPA repository interfaces.
+2025-05-05 12:00:35.862 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-05-05 12:00:35.886 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-05-05 12:00:35.890 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-05-05 12:00:35.891 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-05-05 12:00:36.007 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-05-05 12:00:36.009 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5062 ms
+2025-05-05 12:00:36.415 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-05 12:00:36.499 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-05-05 12:00:36.560 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-05-05 12:00:37.100 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-05 12:00:37.167 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-05-05 12:00:37.747 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@2bc2e022
+2025-05-05 12:00:37.750 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-05-05 12:00:37.806 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-05-05 12:00:37.840 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-05-05 12:00:40.025 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-05 12:00:40.114 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 12:00:41.207 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-05-05 12:00:43.877 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-05 12:00:45.849 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-05-05 12:00:45.874 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-05-05 12:00:45.892 [main] INFO  c.kirill.meetyou.MeetYou2Application - Started MeetYou2Application in 16.973 seconds (process running for 19.376)
+2025-05-05 12:01:23.728 [http-nio-8080-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-05 12:01:23.729 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-05-05 12:01:23.737 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2025-05-05 12:01:23.857 [http-nio-8080-exec-2] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserController.getById(..) with args: [3]
+2025-05-05 12:01:23.857 [http-nio-8080-exec-2] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserService.findById(..) with args: [3]
+2025-05-05 12:01:24.003 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.age,
+        b1_0.id,
+        b1_0.interest_fact,
+        b1_0.user_id,
+        b1_0.bio,
+        u1_0.birth,
+        u1_0.email,
+        u1_0.name 
+    from
+        users u1_0 
+    left join
+        bio b1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=?
+2025-05-05 12:01:24.129 [http-nio-8080-exec-2] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserService.findById(..) returned: Optional[User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19}]
+2025-05-05 12:01:24.146 [http-nio-8080-exec-2] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserController.getById(..) returned: <200 OK OK,User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19},[]>
+2025-05-05 12:01:24.547 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    select
+        i1_0.user_id,
+        i1_1.id,
+        i1_1.interest_type 
+    from
+        user_interest i1_0 
+    join
+        interests i1_1 
+            on i1_1.id=i1_0.interest_id 
+    where
+        i1_0.user_id=?
+2025-05-05 12:01:28.769 [http-nio-8080-exec-3] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserController.getById(..) with args: [3]
+2025-05-05 12:01:28.769 [http-nio-8080-exec-3] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserService.findById(..) with args: [3]
+2025-05-05 12:01:28.770 [http-nio-8080-exec-3] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserService.findById(..) returned: Optional[User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19}]
+2025-05-05 12:01:28.770 [http-nio-8080-exec-3] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserController.getById(..) returned: <200 OK OK,User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19},[]>
+2025-05-05 12:01:45.946 [http-nio-8080-exec-4] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: InterestController.addInterest(..) with args: [3, BOOKS]
+2025-05-05 12:01:45.950 [http-nio-8080-exec-4] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: InterestService.addInterestToUser(..) with args: [3, BOOKS]
+2025-05-05 12:01:45.951 [http-nio-8080-exec-4] INFO  c.k.meetyou.service.InterestService - Добавление интереса 'BOOKS' пользователю 3
+2025-05-05 12:01:45.953 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.age,
+        b1_0.id,
+        b1_0.interest_fact,
+        b1_0.user_id,
+        b1_0.bio,
+        u1_0.birth,
+        u1_0.email,
+        u1_0.name 
+    from
+        users u1_0 
+    left join
+        bio b1_0 
+            on u1_0.id=b1_0.user_id 
+    where
+        u1_0.id=?
+2025-05-05 12:01:46.183 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - 
+    select
+        i1_0.id,
+        i1_0.interest_type 
+    from
+        interests i1_0 
+    where
+        i1_0.interest_type=?
+2025-05-05 12:01:46.208 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - 
+    select
+        i1_0.user_id,
+        i1_1.id,
+        i1_1.interest_type 
+    from
+        user_interest i1_0 
+    join
+        interests i1_1 
+            on i1_1.id=i1_0.interest_id 
+    where
+        i1_0.user_id=?
+2025-05-05 12:01:46.241 [http-nio-8080-exec-4] INFO  c.k.meetyou.service.InterestService - Интерес 'BOOKS' добавлен пользователю 3
+2025-05-05 12:01:46.243 [http-nio-8080-exec-4] DEBUG c.k.meetyou.aspect.LoggingAspect - Method InterestService.addInterestToUser(..) returned: null
+2025-05-05 12:01:46.344 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        user_interest
+        (user_id, interest_id) 
+    values
+        (?, ?)
+2025-05-05 12:01:46.385 [http-nio-8080-exec-4] DEBUG c.k.meetyou.aspect.LoggingAspect - Method InterestController.addInterest(..) returned: null
+2025-05-05 12:01:52.623 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserController.getById(..) with args: [3]
+2025-05-05 12:01:52.624 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method called: UserService.findById(..) with args: [3]
+2025-05-05 12:01:52.625 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserService.findById(..) returned: Optional[User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19}]
+2025-05-05 12:01:52.626 [http-nio-8080-exec-5] DEBUG c.k.meetyou.aspect.LoggingAspect - Method UserController.getById(..) returned: <200 OK OK,User{id=3, name='Misha', email='Misha@example.com', birth=2005-08-20, age=19},[]>
+2025-05-05 12:02:01.226 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-05 12:02:01.246 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-05-05 12:02:01.266 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-05 12:02:01.271 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-05-05 12:02:01.313 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

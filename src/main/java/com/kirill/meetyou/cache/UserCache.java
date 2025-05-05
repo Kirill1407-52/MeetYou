@@ -1,35 +1,27 @@
 package com.kirill.meetyou.cache;
 
 import com.kirill.meetyou.model.User;
+import jakarta.annotation.PreDestroy;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserCache {
-    private static final int MAX_SIZE = 1000;
-    private static final long TTL = 30 * 60 * 1000; // 30 minutes
-    private static final long USER_SIZE_ESTIMATE = 200L; // ~200 bytes per user
-    private static final long MAX_CACHE_SIZE_BYTES = 500_000_000; // 500MB
+    private static final int MAX_SIZE = 100;
+    private static final long TTL = 30 * 60 * 1000;
 
     private final Map<Long, CacheEntry> cache;
-    private long currentCacheSize = 0;
     private final ScheduledExecutorService scheduler;
 
     public UserCache() {
         this.cache = new LinkedHashMap<>(16, 0.75f, true) {
             @Override
             protected boolean removeEldestEntry(Map.Entry<Long, CacheEntry> eldest) {
-                if (size() > MAX_SIZE || currentCacheSize > MAX_CACHE_SIZE_BYTES) {
-                    currentCacheSize -= USER_SIZE_ESTIMATE;
-                    return true;
-                }
-                return false;
+                return size() > MAX_SIZE;
             }
         };
 
@@ -43,7 +35,6 @@ public class UserCache {
             if (entry == null || entry.isExpired()) {
                 if (entry != null) {
                     cache.remove(id);
-                    currentCacheSize -= USER_SIZE_ESTIMATE;
                 }
                 return null;
             }
@@ -53,20 +44,13 @@ public class UserCache {
 
     public void put(Long id, User user) {
         synchronized (cache) {
-            if (cache.containsKey(id)) {
-                currentCacheSize -= USER_SIZE_ESTIMATE;
-            }
             cache.put(id, new CacheEntry(user));
-            currentCacheSize += USER_SIZE_ESTIMATE;
         }
     }
 
     public void remove(Long id) {
         synchronized (cache) {
-            CacheEntry removed = cache.remove(id);
-            if (removed != null) {
-                currentCacheSize -= USER_SIZE_ESTIMATE;
-            }
+            cache.remove(id);
         }
     }
 
@@ -90,20 +74,13 @@ public class UserCache {
 
     private void clearExpired() {
         synchronized (cache) {
-            cache.entrySet().removeIf(entry -> {
-                if (entry.getValue().isExpired()) {
-                    currentCacheSize -= USER_SIZE_ESTIMATE;
-                    return true;
-                }
-                return false;
-            });
+            cache.entrySet().removeIf(entry -> entry.getValue().isExpired());
         }
     }
 
     private void clear() {
         synchronized (cache) {
             cache.clear();
-            currentCacheSize = 0;
         }
     }
 
