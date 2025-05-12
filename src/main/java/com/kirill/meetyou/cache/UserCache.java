@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserCache {
     private static final int MAX_SIZE = 100;
-    private static final long TTL = 1 * 10 * 1000;
+    private static final long TTL = 1L * 10 * 1000;
 
     private final Map<Long, CacheEntry> cache;
     private final ScheduledExecutorService scheduler;

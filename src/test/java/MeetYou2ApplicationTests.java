@@ -1,1 +1,1 @@
-package com.kirill.meetyou;
+package com.src.test.java;
