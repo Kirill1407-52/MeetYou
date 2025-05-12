@@ -12,18 +12,27 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users/{userId}")
 @RequiredArgsConstructor
-@Tag(name = "Bio Management", description = "APIs for managing user bios and interest facts")
+@Tag(name = "Управление биографией",
+        description = "API для управления биографией и интересными фактами пользователей")
 public class BioController {
     private final BioService bioService;
 
     @PostMapping("/bio")
-    @Operation(summary = "Create user bio", description = "Creates a new bio for the specified user")
-    @ApiResponse(responseCode = "201", description = "Bio created successfully")
+    @Operation(summary = "Создать биографию пользователя",
+            description = "Создает новую биографию для указанного пользователя")
+    @ApiResponse(responseCode = "201", description = "Биография успешно создана")
     public ResponseEntity<Response> createUserBio(
             @PathVariable Long userId,
             @Valid @RequestBody CreateRequest request) {
@@ -32,29 +41,33 @@ public class BioController {
     }
 
     @GetMapping("/bio")
-    @Operation(summary = "Get user bio", description = "Retrieves the bio text for the specified user")
-    @ApiResponse(responseCode = "200", description = "Bio retrieved successfully")
+    @Operation(summary = "Получить биографию пользователя",
+            description = "Возвращает текст биографии указанного пользователя")
+    @ApiResponse(responseCode = "200", description = "Биография успешно получена")
     public ResponseEntity<String> getBio(@PathVariable Long userId) {
         return ResponseEntity.ok(bioService.getBioByUserId(userId));
     }
 
     @GetMapping("/interest_fact")
-    @Operation(summary = "Get interest fact", description = "Retrieves the interest fact for the specified user")
-    @ApiResponse(responseCode = "200", description = "Interest fact retrieved successfully")
+    @Operation(summary = "Получить интересный факт",
+            description = "Возвращает интересный факт указанного пользователя")
+    @ApiResponse(responseCode = "200", description = "Интересный факт успешно получен")
     public ResponseEntity<String> getInterestFact(@PathVariable Long userId) {
         return ResponseEntity.ok(bioService.getInterestFactByUserId(userId));
     }
 
     @GetMapping("/bioall")
-    @Operation(summary = "Get full bio", description = "Retrieves complete bio information including interest fact")
-    @ApiResponse(responseCode = "200", description = "Full bio retrieved successfully")
+    @Operation(summary = "Получить полную биографию",
+            description = "Возвращает полную информацию о биографии, включая интересный факт")
+    @ApiResponse(responseCode = "200", description = "Полная биография успешно получена")
     public ResponseEntity<Response> getFullBio(@PathVariable Long userId) {
         return ResponseEntity.ok(bioService.getFullBioByUserId(userId));
     }
 
     @PutMapping("/bio")
-    @Operation(summary = "Update bio", description = "Updates the bio for the specified user")
-    @ApiResponse(responseCode = "200", description = "Bio updated successfully")
+    @Operation(summary = "Обновить биографию",
+            description = "Обновляет биографию указанного пользователя")
+    @ApiResponse(responseCode = "200", description = "Биография успешно обновлена")
     public ResponseEntity<Response> updateBio(
             @PathVariable Long userId,
             @Valid @RequestBody UpdateBioRequest request) {
@@ -62,8 +75,9 @@ public class BioController {
     }
 
     @PutMapping("/interest_fact")
-    @Operation(summary = "Update interest fact", description = "Updates the interest fact for the specified user")
-    @ApiResponse(responseCode = "200", description = "Interest fact updated successfully")
+    @Operation(summary = "Обновить интересный факт",
+            description = "Обновляет интересный факт указанного пользователя")
+    @ApiResponse(responseCode = "200", description = "Интересный факт успешно обновлен")
     public ResponseEntity<Response> updateInterestFact(
             @PathVariable Long userId,
             @Valid @RequestBody UpdateInterestFactRequest request) {
@@ -71,16 +85,18 @@ public class BioController {
     }
 
     @DeleteMapping("/bio")
-    @Operation(summary = "Delete bio", description = "Deletes the bio for the specified user")
-    @ApiResponse(responseCode = "204", description = "Bio deleted successfully")
+    @Operation(summary = "Удалить биографию",
+            description = "Удаляет биографию указанного пользователя")
+    @ApiResponse(responseCode = "204", description = "Биография успешно удалена")
     public ResponseEntity<Void> deleteUserBio(@PathVariable Long userId) {
         bioService.deleteUserBio(userId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/interest_fact")
-    @Operation(summary = "Delete interest fact", description = "Deletes the interest fact for the specified user")
-    @ApiResponse(responseCode = "204", description = "Interest fact deleted successfully")
+    @Operation(summary = "Удалить интересный факт",
+            description = "Удаляет интересный факт указанного пользователя")
+    @ApiResponse(responseCode = "204", description = "Интересный факт успешно удален")
     public ResponseEntity<Void> deleteInterestFact(@PathVariable Long userId) {
         bioService.deleteInterestFact(userId);
         return ResponseEntity.noContent().build();

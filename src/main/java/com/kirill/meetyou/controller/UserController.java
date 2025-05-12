@@ -5,6 +5,9 @@ import com.kirill.meetyou.dto.BulkResponse;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.UserRepository;
 import com.kirill.meetyou.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -29,11 +32,21 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
+    @Operation(summary = "Получить всех пользователей",
+            description = "Возвращает список всех пользователей системы")
+    @ApiResponse(responseCode = "200",
+            description = "Список пользователей успешно получен")
     @GetMapping
     public ResponseEntity<List<User>> findAll() {
         return ResponseEntity.ok(userService.findAll());
     }
 
+    @Operation(summary = "Получить пользователя по ID",
+            description = "Возвращает информацию о пользователе по его идентификатору")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Пользователь успешно найден"),
+        @ApiResponse(responseCode = "404", description = "Пользователь не найден")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<User> getById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id)
@@ -41,23 +54,38 @@ public class UserController {
                         "Юзер с id: " + id + " не найден")));
     }
 
+    @Operation(summary = "Создать пользователя",
+            description = "Создает нового пользователя в системе")
+    @ApiResponse(responseCode = "201", description = "Пользователь успешно создан")
     @PostMapping(consumes = "application/json")
     public ResponseEntity<User> create(@RequestBody User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(user));
     }
 
+    @Operation(summary = "Массовое создание пользователей",
+            description = "Создает несколько пользователей одновременно")
+    @ApiResponse(responseCode = "201", description = "Пользователи успешно созданы")
     @PostMapping("/bulk")
     public ResponseEntity<BulkResponse> bulkCreate(@RequestBody @Valid BulkCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userService.bulkCreate(request.getUsers()));
     }
 
+    @Operation(summary = "Удалить пользователя",
+            description = "Удаляет пользователя по его идентификатору")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Пользователь успешно удален"),
+        @ApiResponse(responseCode = "404", description = "Пользователь не найден")
+    })
     @DeleteMapping(path = "{id}")
     public ResponseEntity<Void> delete(@PathVariable(name = "id") Long id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Обновить пользователя",
+            description = "Обновляет информацию о пользователе (email и/или имя)")
+    @ApiResponse(responseCode = "200", description = "Пользователь успешно обновлен")
     @PutMapping(path = "{id}")
     public ResponseEntity<Void> update(
             @PathVariable Long id,
@@ -69,12 +97,22 @@ public class UserController {
     }
 
     // Обновленные методы для работы с интересами (теперь через String)
+    @Operation(summary = "Поиск по интересу",
+            description = "Возвращает пользователей, у которых есть указанный интерес")
+    @ApiResponse(responseCode = "200",
+            description = "Список пользователей успешно получен")
     @GetMapping("/by-interest")
     public ResponseEntity<List<User>> getUsersByInterest(
             @RequestParam String interestType) {
         return ResponseEntity.ok(userRepository.findUsersByInterestType(interestType));
     }
 
+    @Operation(summary = "Поиск по всем интересам",
+            description = "Возвращает пользователей, у которых есть все указанные интересы")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Список пользователей успешно получен"),
+        @ApiResponse(responseCode = "400", description = "Не указаны интересы для поиска")
+    })
     @GetMapping("/by-all-interests")
     public ResponseEntity<List<User>> getUsersByAllInterests(
             @RequestParam Set<String> interestTypes) {
@@ -86,6 +124,13 @@ public class UserController {
                 interestTypes.size()));
     }
 
+    @Operation(summary = "Поиск по любому из интересов",
+            description = "Возвращает пользователей, у которых"
+                    + " есть хотя бы один из указанных интересов")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Список пользователей успешно получен"),
+        @ApiResponse(responseCode = "400", description = "Не указаны интересы для поиска")
+    })
     @GetMapping("/by-any-interest")
     public ResponseEntity<List<User>> getUsersByAnyInterest(
             @RequestParam Set<String> interestTypes) {

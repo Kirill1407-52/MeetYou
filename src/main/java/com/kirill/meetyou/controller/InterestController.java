@@ -7,18 +7,25 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users/{userId}/interests")
 @RequiredArgsConstructor
-@Tag(name = "Interest Management", description = "APIs for managing user interests")
+@Tag(name = "Управление интересами", description = "API для управления интересами пользователей")
 public class InterestController {
     private final InterestService interestService;
 
     @PostMapping
-    @Operation(summary = "Add interest", description = "Adds a new interest to the specified user")
-    @ApiResponse(responseCode = "200", description = "Interest added successfully")
+    @Operation(summary = "Добавить интерес",
+            description = "Добавляет новый интерес для указанного пользователя")
+    @ApiResponse(responseCode = "200", description = "Интерес успешно добавлен")
     public void addInterest(
             @PathVariable Long userId,
             @RequestParam String interestName) {
@@ -26,8 +33,9 @@ public class InterestController {
     }
 
     @DeleteMapping
-    @Operation(summary = "Remove interest", description = "Removes an interest from the specified user")
-    @ApiResponse(responseCode = "200", description = "Interest removed successfully")
+    @Operation(summary = "Удалить интерес",
+            description = "Удаляет интерес у указанного пользователя")
+    @ApiResponse(responseCode = "200", description = "Интерес успешно удален")
     public void removeInterest(
             @PathVariable Long userId,
             @RequestParam String interestName) {
@@ -35,8 +43,9 @@ public class InterestController {
     }
 
     @GetMapping
-    @Operation(summary = "Get user interests", description = "Retrieves all interests of the specified user")
-    @ApiResponse(responseCode = "200", description = "Interests retrieved successfully")
+    @Operation(summary = "Получить интересы пользователя",
+            description = "Возвращает все интересы указанного пользователя")
+    @ApiResponse(responseCode = "200", description = "Интересы успешно получены")
     public Set<Interest> getUserInterests(@PathVariable Long userId) {
         return interestService.getUserInterests(userId);
     }

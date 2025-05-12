@@ -2,6 +2,10 @@ package com.kirill.meetyou.controller;
 
 import com.kirill.meetyou.model.Photo;
 import com.kirill.meetyou.service.PhotoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +23,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/users/{userId}/photos")
 @RequiredArgsConstructor
+@Tag(name = "Управление фотографиями", description = "API для работы с фотографиями пользователей")
 public class PhotoController {
     private static final String ERROR_KEY = "error";
     private final PhotoService photoService;
 
+    @Operation(summary = "Добавить фотографию",
+            description = "Добавляет новую фотографию для указанного пользователя")
+    @ApiResponses({@ApiResponse(responseCode = "201",
+            description = "Фотография успешно добавлена"),
+        @ApiResponse(responseCode = "400", description = "Неверные параметры запроса")
+    })
     @PostMapping
     public ResponseEntity<Object> addPhoto(
             @PathVariable Long userId,
@@ -36,6 +47,12 @@ public class PhotoController {
         }
     }
 
+    @Operation(summary = "Добавить несколько фотографий",
+            description = "Добавляет несколько фотографий для указанного пользователя")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Фотографии успешно добавлены"),
+        @ApiResponse(responseCode = "400", description = "Неверные параметры запроса")
+    })
     @PostMapping("/batch")
     public ResponseEntity<Object> addMultiplePhotos(
             @PathVariable Long userId,
@@ -49,6 +66,9 @@ public class PhotoController {
         }
     }
 
+    @Operation(summary = "Получить все фотографии",
+            description = "Возвращает все фотографии указанного пользователя")
+    @ApiResponse(responseCode = "200", description = "Список фотографий успешно получен")
     @GetMapping
     public ResponseEntity<List<Photo>> getAllPhotos(
             @PathVariable Long userId) {
@@ -56,6 +76,12 @@ public class PhotoController {
         return ResponseEntity.ok(photos);
     }
 
+    @Operation(summary = "Получить фотографию по ID",
+            description = "Возвращает фотографию по её идентификатору")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Фотография успешно получена"),
+        @ApiResponse(responseCode = "404", description = "Фотография не найдена")
+    })
     @GetMapping("/{photoId}")
     public ResponseEntity<Object> getPhoto(
             @PathVariable Long userId,
@@ -69,6 +95,11 @@ public class PhotoController {
         }
     }
 
+    @Operation(summary = "Обновить фотографию", description = "Обновляет информацию о фотографии")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Фотография успешно обновлена"),
+        @ApiResponse(responseCode = "400", description = "Неверные параметры запроса")
+    })
     @PutMapping("/{photoId}")
     public ResponseEntity<Object> updatePhoto(
             @PathVariable Long userId,
@@ -83,6 +114,13 @@ public class PhotoController {
         }
     }
 
+    @Operation(summary = "Установить как основную",
+            description = "Устанавливает фотографию как основную для профиля пользователя")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200",
+                description = "Фотография успешно установлена как основная"),
+        @ApiResponse(responseCode = "400", description = "Неверные параметры запроса")
+    })
     @PutMapping("/{photoId}/set-main")
     public ResponseEntity<Object> setAsMainPhoto(
             @PathVariable Long userId,
@@ -96,6 +134,12 @@ public class PhotoController {
         }
     }
 
+    @Operation(summary = "Удалить фотографию",
+            description = "Удаляет фотографию по её идентификатору")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Фотография успешно удалена"),
+        @ApiResponse(responseCode = "404", description = "Фотография не найдена")
+    })
     @DeleteMapping("/{photoId}")
     public ResponseEntity<Object> deletePhoto(
             @PathVariable Long userId,

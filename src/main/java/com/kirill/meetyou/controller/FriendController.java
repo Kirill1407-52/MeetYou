@@ -8,18 +8,25 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/friends")
 @RequiredArgsConstructor
-@Tag(name = "Friend Management", description = "APIs for managing user friendships")
+@Tag(name = "Управление друзьями",
+        description = "API для управления дружескими связями пользователей")
 public class FriendController {
     private final FriendService friendService;
 
     @PostMapping("/{userId}/add/{friendId}")
-    @Operation(summary = "Add friend", description = "Establishes a friendship between two users")
-    @ApiResponse(responseCode = "200", description = "Friend added successfully")
+    @Operation(summary = "Добавить друга",
+            description = "Устанавливает дружескую связь между двумя пользователями")
+    @ApiResponse(responseCode = "200", description = "Друг успешно добавлен")
     public ResponseEntity<Void> addFriend(
             @PathVariable Long userId,
             @PathVariable Long friendId) {
@@ -28,8 +35,9 @@ public class FriendController {
     }
 
     @DeleteMapping("/{userId}/remove/{friendId}")
-    @Operation(summary = "Remove friend", description = "Removes a friendship between two users")
-    @ApiResponse(responseCode = "200", description = "Friend removed successfully")
+    @Operation(summary = "Удалить друга",
+            description = "Удаляет дружескую связь между двумя пользователями")
+    @ApiResponse(responseCode = "200", description = "Друг успешно удален")
     public ResponseEntity<Void> removeFriend(
             @PathVariable Long userId,
             @PathVariable Long friendId) {
@@ -38,15 +46,17 @@ public class FriendController {
     }
 
     @GetMapping("/{userId}/all")
-    @Operation(summary = "Get all friends", description = "Retrieves all friends of the specified user")
-    @ApiResponse(responseCode = "200", description = "Friends list retrieved successfully")
+    @Operation(summary = "Получить всех друзей",
+            description = "Возвращает список всех друзей указанного пользователя")
+    @ApiResponse(responseCode = "200", description = "Список друзей успешно получен")
     public ResponseEntity<List<User>> getAllFriends(@PathVariable Long userId) {
         return ResponseEntity.ok(friendService.getAllFriends(userId));
     }
 
     @GetMapping("/{userId}/check/{friendId}")
-    @Operation(summary = "Check friendship", description = "Checks if a friendship exists between two users")
-    @ApiResponse(responseCode = "200", description = "Friendship status retrieved successfully")
+    @Operation(summary = "Проверить дружбу",
+            description = "Проверяет наличие дружеской связи между двумя пользователями")
+    @ApiResponse(responseCode = "200", description = "Статус дружбы успешно получен")
     public ResponseEntity<Boolean> checkFriendship(
             @PathVariable Long userId,
             @PathVariable Long friendId) {
