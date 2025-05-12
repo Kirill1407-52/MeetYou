@@ -26,10 +26,10 @@ public class BioDto {
     public static class CreateRequest {
         @NotBlank
         @Size(max = 300)
-        private String bio;
+        public String bio;
 
         @Size(max = 150)
-        private String interestFact;
+        public String interestFact;
     }
 
     @Data
@@ -37,13 +37,13 @@ public class BioDto {
     public static class UpdateBioRequest {
         @NotBlank
         @Size(max = 300)
-        private String bio;
+        public String bio;
     }
 
     @Data
     @Builder
     public static class UpdateInterestFactRequest {
         @Size(max = 150)
-        private String interestFact;
+        public String interestFact;
     }
 }
