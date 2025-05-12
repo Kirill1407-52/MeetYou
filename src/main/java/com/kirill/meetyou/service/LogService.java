@@ -5,16 +5,19 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
+@Setter
 @Service
 @Slf4j
 public class LogService {
 
+    // Добавленный сеттер для тестов
     @Value("${logging.file.path:./logs}")
     private String logDirectory;
 

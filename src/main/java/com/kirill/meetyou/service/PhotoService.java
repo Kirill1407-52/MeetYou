@@ -6,6 +6,7 @@ import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.PhotoRepository;
 import com.kirill.meetyou.repository.UserRepository;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -79,6 +80,10 @@ public class PhotoService {
     public List<Photo> addMultiplePhotos(Long userId, List<Photo> photos) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (photos.isEmpty()) {
+            return Collections.emptyList();  // Возвращаем пустой список без вызова saveAll
+        }
 
         boolean hasMainPhoto = photos.stream()
                 .anyMatch(p -> "true".equals(p.getIsMainString()));

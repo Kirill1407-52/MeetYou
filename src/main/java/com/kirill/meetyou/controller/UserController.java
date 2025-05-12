@@ -1,8 +1,11 @@
 package com.kirill.meetyou.controller;
 
+import com.kirill.meetyou.dto.BulkCreateRequest;
+import com.kirill.meetyou.dto.BulkResponse;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.UserRepository;
 import com.kirill.meetyou.service.UserService;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +44,12 @@ public class UserController {
     @PostMapping(consumes = "application/json")
     public ResponseEntity<User> create(@RequestBody User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(user));
+    }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<BulkResponse> bulkCreate(@RequestBody @Valid BulkCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.bulkCreate(request.getUsers()));
     }
 
     @DeleteMapping(path = "{id}")

@@ -1,10 +1,13 @@
 package com.kirill.meetyou.service;
 
 import com.kirill.meetyou.cache.UserCache;
+import com.kirill.meetyou.dto.BulkResponse;
+import com.kirill.meetyou.dto.UserCreateDto;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -36,21 +39,24 @@ public class UserService {
                     "Некорректный ID пользователя");
         }
 
-        // Попытка получить из кэша
+        log.debug("⚡ [Cache Check] Checking cache for user ID: {}", id);
         User cachedUser = cache.get(id);
         if (cachedUser != null) {
-            log.debug("Retrieved user {} FROM CACHE: {}", id, cachedUser);
+            log.info("✅ [Cache Hit] Successfully retrieved user {} FROM CACHE", id);
+            log.debug("📦 Cached user details: {}", cachedUser);
             return Optional.of(cachedUser);
         }
 
-        log.debug("Fetching user {} FROM DATABASE", id);
+        log.info("⏳ [Cache Miss] User {} not found in cache, querying database...", id);
         Optional<User> userOptional = userRepository.findById(id);
+
         if (userOptional.isPresent()) {
             User user = userOptional.get();
+            log.debug("🔧 [Cache Update] Caching user {}", id);
             cache.put(id, user);
-            log.debug("Cached user {}: {}", id, user);
+            log.info("📥 [Cache Store] Stored user {} in cache", id);
         } else {
-            log.debug("User {} not found in database", id);
+            log.debug("⚠ [Cache Skip] User {} not found in database - nothing to cache", id);
         }
 
         return userOptional;
@@ -63,8 +69,10 @@ public class UserService {
 
         user.setAge(Period.between(user.getBirth(), LocalDate.now()).getYears());
         User savedUser = userRepository.save(user);
+
+        log.debug("🔧 [Cache Update] Caching newly created user {}", savedUser.getId());
         cache.put(savedUser.getId(), savedUser);
-        log.info("Created new user with ID: {}", savedUser.getId());
+        log.info("📥 [Cache Store] Stored new user {} in cache", savedUser.getId());
 
         return savedUser;
     }
@@ -80,8 +88,9 @@ public class UserService {
                     "Пользователь с id: " + id + " не найден");
         }
 
-        userRepository.deleteById(id);
+        log.debug("🗑 [Cache Remove] Removing user {} from cache", id);
         cache.remove(id);
+        userRepository.deleteById(id);
         log.info("Successfully deleted user: {}", id);
     }
 
@@ -103,13 +112,15 @@ public class UserService {
         updateUserName(user, name);
 
         User updatedUser = userRepository.save(user);
+
+        log.debug("🔧 [Cache Update] Updating cache for user {}", id);
         cache.put(id, updatedUser);
-        log.info("Successfully updated user: {}", id);
+        log.info("📥 [Cache Store] Updated user {} in cache", id);
 
         return updatedUser;
     }
 
-    // Вспомогательные методы
+    // Остальные вспомогательные методы остаются без изменений
     private void validateUserForCreation(User user) {
         if (user.getEmail().isEmpty()) {
             log.error("Attempt to create user with empty email");
@@ -165,5 +176,33 @@ public class UserService {
             user.setName(name);
             log.debug("Updated name for user: {}", user.getId());
         }
+    }
+
+    @Transactional
+    public BulkResponse bulkCreate(List<UserCreateDto> userDtos) {
+        BulkResponse.BulkResponseBuilder responseBuilder = BulkResponse.builder()
+                .successCount(0)
+                .failCount(0)
+                .errors(new ArrayList<>());
+
+        userDtos.forEach(dto -> {
+            try {
+                User user = new User();
+                user.setName(dto.getName());
+                user.setEmail(dto.getEmail());
+                user.setBirth(dto.getBirth());
+                user.setAge(Period.between(dto.getBirth(), LocalDate.now()).getYears());
+
+                User savedUser = userRepository.save(user); // Сохраняем сначала в БД
+                cache.put(savedUser.getId(), savedUser); // Затем кэшируем с реальным ID
+                responseBuilder.successCount(responseBuilder.build().getSuccessCount() + 1);
+            } catch (Exception e) {
+                responseBuilder.failCount(responseBuilder.build().getFailCount() + 1);
+                responseBuilder.errors(List.of("Ошибка при создании пользователя "
+                        + dto.getEmail() + ": " + e.getMessage()));
+            }
+        });
+
+        return responseBuilder.build();
     }
 }
