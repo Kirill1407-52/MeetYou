@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @RequiredArgsConstructor
 public class PhotoService {
+    private static final String CLEAR_MAIN_PHOTOS_LOG = "Очистка текущих главных фотографий для пользователя {}";
     private final PhotoRepository photoRepository;
     private final UserRepository userRepository;
 
@@ -33,7 +34,7 @@ public class PhotoService {
                             + " с id: " + userId + " не найден"));
 
             if (isMainPhoto(photo)) {
-                log.debug("Очистка текущих главных фотографий для пользователя {}", userId);
+                log.debug(CLEAR_MAIN_PHOTOS_LOG, userId);
                 photoRepository.clearMainPhotos(userId);
             }
 
@@ -94,7 +95,7 @@ public class PhotoService {
             Photo photo = getPhotoById(userId, photoId);
 
             if (isMainPhoto(photoDetails) && !isMainPhoto(photo)) {
-                log.debug("Очистка текущих главных фотографий для пользователя {}", userId);
+                log.debug(CLEAR_MAIN_PHOTOS_LOG, userId);
                 photoRepository.clearMainPhotos(userId);
             }
 
@@ -170,7 +171,7 @@ public class PhotoService {
             boolean hasMainPhoto = photos.stream().anyMatch(this::isMainPhoto);
 
             if (hasMainPhoto) {
-                log.debug("Очистка текущих главных фотографий для пользователя {}", userId);
+                log.debug(CLEAR_MAIN_PHOTOS_LOG, userId);
                 photoRepository.clearMainPhotos(userId);
             }
 

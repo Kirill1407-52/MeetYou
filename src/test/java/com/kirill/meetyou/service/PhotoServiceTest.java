@@ -90,16 +90,30 @@ class PhotoServiceTest {
 
     @Test
     void addPhoto_ShouldThrowExceptionForInvalidUserId() {
-        // Act & Assert
-        assertThrows(ResponseStatusException.class, () -> photoService.addPhoto(null, testPhoto));
-        assertThrows(ResponseStatusException.class, () -> photoService.addPhoto(0L, testPhoto));
+        // Act & Assert - separate into two tests
+        assertThrows(ResponseStatusException.class, () -> {
+            Photo photo = testPhoto;
+            photoService.addPhoto(null, photo);
+        });
+
+        assertThrows(ResponseStatusException.class, () -> {
+            Photo photo = testPhoto;
+            photoService.addPhoto(0L, photo);
+        });
     }
 
     @Test
     void addPhoto_ShouldThrowExceptionForInvalidPhoto() {
-        // Act & Assert
-        assertThrows(ResponseStatusException.class, () -> photoService.addPhoto(1L, null));
+        // Act & Assert - separate null test
+        assertThrows(ResponseStatusException.class, () -> {
+            Photo photo = null;
+            photoService.addPhoto(1L, photo);
+        });
+    }
 
+    @Test
+    void addPhoto_ShouldThrowExceptionForEmptyPhotoUrl() {
+        // Act & Assert - separate empty URL test
         Photo invalidPhoto = new Photo();
         invalidPhoto.setPhotoUrl("");
         assertThrows(ResponseStatusException.class, () -> photoService.addPhoto(1L, invalidPhoto));
