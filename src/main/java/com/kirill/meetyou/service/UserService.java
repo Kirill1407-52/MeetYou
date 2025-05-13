@@ -28,104 +28,141 @@ public class UserService {
     }
 
     public List<User> findAll() {
-        log.debug("Fetching all users");
-        return userRepository.findAll();
+        try {
+            log.debug("Fetching all users");
+            return userRepository.findAll();
+        } catch (Exception e) {
+            log.error("Failed to fetch all users. Error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error while fetching users");
+        }
     }
 
     public Optional<User> findById(Long id) {
-        if (id == null || id <= 0) {
-            log.warn("Invalid user ID requested: {}", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Некорректный ID пользователя");
+        try {
+            if (id == null || id <= 0) {
+                log.warn("Invalid user ID requested: {}", id);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Некорректный ID пользователя");
+            }
+
+            log.debug("⚡ [Cache Check] Checking cache for user ID: {}", id);
+            User cachedUser = cache.get(id);
+            if (cachedUser != null) {
+                log.info("✅ [Cache Hit] Successfully retrieved user {} FROM CACHE", id);
+                log.debug("📦 Cached user details: {}", cachedUser);
+                return Optional.of(cachedUser);
+            }
+
+            log.info("⏳ [Cache Miss] User {} not found in cache, querying database...", id);
+            Optional<User> userOptional = userRepository.findById(id);
+
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                log.debug("🔧 [Cache Update] Caching user {}", id);
+                cache.put(id, user);
+                log.info("📥 [Cache Store] Stored user {} in cache", id);
+            } else {
+                log.debug("⚠ [Cache Skip] User {} not found in database - nothing to cache", id);
+            }
+
+            return userOptional;
+        } catch (Exception e) {
+            log.error("Failed to find user with ID: {}. Error: {}", id, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error while finding user");
         }
-
-        log.debug("⚡ [Cache Check] Checking cache for user ID: {}", id);
-        User cachedUser = cache.get(id);
-        if (cachedUser != null) {
-            log.info("✅ [Cache Hit] Successfully retrieved user {} FROM CACHE", id);
-            log.debug("📦 Cached user details: {}", cachedUser);
-            return Optional.of(cachedUser);
-        }
-
-        log.info("⏳ [Cache Miss] User {} not found in cache, querying database...", id);
-        Optional<User> userOptional = userRepository.findById(id);
-
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            log.debug("🔧 [Cache Update] Caching user {}", id);
-            cache.put(id, user);
-            log.info("📥 [Cache Store] Stored user {} in cache", id);
-        } else {
-            log.debug("⚠ [Cache Skip] User {} not found in database - nothing to cache", id);
-        }
-
-        return userOptional;
     }
 
     public User create(User user) {
-        log.info("Creating new user with email: {}", user.getEmail());
+        try {
+            log.info("Creating new user with email: {}", user != null ? user.getEmail() : "null");
 
-        validateUserForCreation(user);
+            validateUserForCreation(user);
 
-        user.setAge(Period.between(user.getBirth(), LocalDate.now()).getYears());
-        User savedUser = userRepository.save(user);
+            user.setAge(Period.between(user.getBirth(), LocalDate.now()).getYears());
+            User savedUser = userRepository.save(user);
 
-        log.debug("🔧 [Cache Update] Caching newly created user {}", savedUser.getId());
-        cache.put(savedUser.getId(), savedUser);
-        log.info("📥 [Cache Store] Stored new user {} in cache", savedUser.getId());
+            log.debug("🔧 [Cache Update] Caching newly created user {}", savedUser.getId());
+            cache.put(savedUser.getId(), savedUser);
+            log.info("📥 [Cache Store] Stored new user {} in cache", savedUser.getId());
 
-        return savedUser;
+            return savedUser;
+        } catch (ResponseStatusException e) {
+            throw e; // Re-throw validation or known errors
+        } catch (Exception e) {
+            log.error("Failed to create user with email: {}. Error: {}", user != null ? user.getEmail() : "null", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось создать пользователя из-за некорректных данных или существующего email");
+        }
     }
 
     public void delete(Long id) {
-        log.info("Deleting user with ID: {}", id);
+        try {
+            log.info("Deleting user with ID: {}", id);
 
-        validateUserId(id);
+            validateUserId(id);
 
-        if (!userRepository.existsById(id)) {
-            log.warn("Attempt to delete non-existent user: {}", id);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Пользователь с id: " + id + " не найден");
+            if (!userRepository.existsById(id)) {
+                log.warn("Attempt to delete non-existent user: {}", id);
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Пользователь с id: " + id + " не найден");
+            }
+
+            log.debug("🗑 [Cache Remove] Removing user {} from cache", id);
+            cache.remove(id);
+            userRepository.deleteById(id);
+            log.info("Successfully deleted user: {}", id);
+        } catch (Exception e) {
+            log.error("Failed to delete user with ID: {}. Error: {}", id, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error while deleting user");
         }
-
-        log.debug("🗑 [Cache Remove] Removing user {} from cache", id);
-        cache.remove(id);
-        userRepository.deleteById(id);
-        log.info("Successfully deleted user: {}", id);
     }
 
     @SuppressWarnings("UnusedReturnValue")
     @Transactional
     public User update(Long id, String email, String name) {
-        log.info("Updating user {} with email: {}, name: {}", id, email, name);
+        try {
+            log.info("Updating user {} with email: {}, name: {}", id, email, name);
 
-        validateUserId(id);
+            validateUserId(id);
 
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("User not found for update: {}", id);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Пользователь с id: " + id + " не найден");
-                });
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> {
+                        log.warn("User not found for update: {}", id);
+                        return new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Пользователь с id: " + id + " не найден");
+                    });
 
-        updateUserEmail(user, email);
-        updateUserName(user, name);
+            updateUserEmail(user, email);
+            updateUserName(user, name);
 
-        User updatedUser = userRepository.save(user);
+            User updatedUser = userRepository.save(user);
 
-        log.debug("🔧 [Cache Update] Updating cache for user {}", id);
-        cache.put(id, updatedUser);
-        log.info("📥 [Cache Store] Updated user {} in cache", id);
+            log.debug("🔧 [Cache Update] Updating cache for user {}", id);
+            cache.put(id, updatedUser);
+            log.info("📥 [Cache Store] Updated user {} in cache", id);
 
-        return updatedUser;
+            return updatedUser;
+        } catch (Exception e) {
+            log.error("Failed to update user with ID: {}. Error: {}", id, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error while updating user");
+        }
     }
 
-    // Остальные вспомогательные методы остаются без изменений
     private void validateUserForCreation(User user) {
-        if (user.getEmail().isEmpty()) {
-            log.error("Attempt to create user with empty email");
+        if (user == null) {
+            log.error("Attempt to create null user");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Объект пользователя не может быть null");
+        }
+
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty() || user.getEmail().trim().equalsIgnoreCase("null")) {
+            log.error("Attempt to create user with null, empty, or 'null' email");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Email пользователя не может быть пустым");
+                    "Email пользователя не может быть пустым, null или 'null'");
+        }
+
+        if (user.getName() == null || user.getName().trim().isEmpty()) {
+            log.error("Attempt to create user with null or empty name");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Имя пользователя не может быть пустым или null");
         }
 
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -151,10 +188,10 @@ public class UserService {
 
     private void updateUserEmail(User user, String email) {
         if (email != null && !email.equals(user.getEmail())) {
-            if (email.isEmpty()) {
-                log.warn("Attempt to set empty email for user: {}", user.getId());
+            if (email.trim().isEmpty() || email.trim().equalsIgnoreCase("null")) {
+                log.warn("Attempt to set empty or 'null' email for user: {}", user.getId());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Email не может быть пустым");
+                        "Email не может быть пустым или 'null'");
             }
             if (userRepository.findByEmail(email).isPresent()) {
                 log.warn("Duplicate email attempt during update: {}", email);
@@ -168,7 +205,7 @@ public class UserService {
 
     private void updateUserName(User user, String name) {
         if (name != null) {
-            if (name.isEmpty()) {
+            if (name.trim().isEmpty()) {
                 log.warn("Attempt to set empty name for user: {}", user.getId());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Имя не может быть пустым");
@@ -180,29 +217,43 @@ public class UserService {
 
     @Transactional
     public BulkResponse bulkCreate(List<UserCreateDto> userDtos) {
-        BulkResponse.BulkResponseBuilder responseBuilder = BulkResponse.builder()
-                .successCount(0)
-                .failCount(0)
-                .errors(new ArrayList<>());
-
-        userDtos.forEach(dto -> {
-            try {
-                User user = new User();
-                user.setName(dto.getName());
-                user.setEmail(dto.getEmail());
-                user.setBirth(dto.getBirth());
-                user.setAge(Period.between(dto.getBirth(), LocalDate.now()).getYears());
-
-                User savedUser = userRepository.save(user); // Сохраняем сначала в БД
-                cache.put(savedUser.getId(), savedUser); // Затем кэшируем с реальным ID
-                responseBuilder.successCount(responseBuilder.build().getSuccessCount() + 1);
-            } catch (Exception e) {
-                responseBuilder.failCount(responseBuilder.build().getFailCount() + 1);
-                responseBuilder.errors(List.of("Ошибка при создании пользователя "
-                        + dto.getEmail() + ": " + e.getMessage()));
+        try {
+            if (userDtos == null) {
+                log.error("Attempt to bulk create with null user DTO list");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Список пользователей не может быть null");
             }
-        });
 
-        return responseBuilder.build();
+            BulkResponse.BulkResponseBuilder responseBuilder = BulkResponse.builder()
+                    .successCount(0)
+                    .failCount(0)
+                    .errors(new ArrayList<>());
+
+            userDtos.forEach(dto -> {
+                try {
+                    User user = new User();
+                    user.setName(dto.getName());
+                    user.setEmail(dto.getEmail());
+                    user.setBirth(dto.getBirth());
+
+                    validateUserForCreation(user); // Добавляем валидацию
+
+                    user.setAge(Period.between(dto.getBirth(), LocalDate.now()).getYears());
+                    User savedUser = userRepository.save(user);
+                    cache.put(savedUser.getId(), savedUser);
+                    responseBuilder.successCount(responseBuilder.build().getSuccessCount() + 1);
+                } catch (ResponseStatusException e) {
+                    responseBuilder.failCount(responseBuilder.build().getFailCount() + 1);
+                    responseBuilder.errors(List.of("Ошибка при создании пользователя с email " + dto.getEmail() + ": " + e.getReason()));
+                } catch (Exception e) {
+                    responseBuilder.failCount(responseBuilder.build().getFailCount() + 1);
+                    responseBuilder.errors(List.of("Ошибка при создании пользователя с email " + dto.getEmail() + ": " + e.getMessage()));
+                }
+            });
+
+            return responseBuilder.build();
+        } catch (Exception e) {
+            log.error("Failed to bulk create users. Error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error during bulk user creation");
+        }
     }
 }
