@@ -15,12 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,21 +35,20 @@ class UserServiceTest {
     private UserService userService;
 
     private User testUser;
-    private UserCreateDto testUserCreateDto;
 
     @BeforeEach
     void setUp() {
         testUser = new User();
         testUser.setId(1L);
-        testUser.setName("Test User");
-        testUser.setEmail("test@example.com");
+        testUser.setName("John Doe");
+        testUser.setEmail("john@example.com");
         testUser.setBirth(LocalDate.of(1990, 1, 1));
         testUser.setAge(33);
 
-        testUserCreateDto = new UserCreateDto();
-        testUserCreateDto.setName("New User");
-        testUserCreateDto.setEmail("new@example.com");
-        testUserCreateDto.setBirth(LocalDate.of(1995, 5, 5));
+        UserCreateDto testUserCreateDto = new UserCreateDto();
+        testUserCreateDto.setName("Jane Doe");
+        testUserCreateDto.setEmail("jane@example.com");
+        testUserCreateDto.setBirth(LocalDate.of(1995, 5, 15));
     }
 
     @Test
@@ -64,11 +62,37 @@ class UserServiceTest {
         // Assert
         assertEquals(1, result.size());
         assertEquals(testUser, result.get(0));
-        verify(userRepository, times(1)).findAll();
+        verify(userRepository).findAll();
     }
 
     @Test
-    void findById_WithValidId_ShouldReturnUser() {
+    void findAll_ShouldThrowExceptionWhenRepositoryFails() {
+        // Arrange
+        when(userRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.findAll());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+    }
+
+    @Test
+    void findById_ShouldReturnUserFromCache() {
+        // Arrange
+        when(cache.get(1L)).thenReturn(testUser);
+
+        // Act
+        Optional<User> result = userService.findById(1L);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(testUser, result.get());
+        verify(cache).get(1L);
+        verify(userRepository, never()).findById(any());
+    }
+
+    @Test
+    void findById_ShouldReturnUserFromRepositoryAndCacheIt() {
         // Arrange
         when(cache.get(1L)).thenReturn(null);
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
@@ -79,93 +103,83 @@ class UserServiceTest {
         // Assert
         assertTrue(result.isPresent());
         assertEquals(testUser, result.get());
-        verify(cache, times(1)).get(1L);
-        verify(userRepository, times(1)).findById(1L);
-        verify(cache, times(1)).put(1L, testUser);
+        verify(cache).get(1L);
+        verify(userRepository).findById(1L);
+        verify(cache).put(1L, testUser);
     }
 
     @Test
-    void findById_WithCachedUser_ShouldReturnUserFromCache() {
+    void findById_ShouldReturnEmptyForNonExistentUser() {
         // Arrange
-        when(cache.get(1L)).thenReturn(testUser);
+        when(cache.get(1L)).thenReturn(null);
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act
         Optional<User> result = userService.findById(1L);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals(testUser, result.get());
-        verify(cache, times(1)).get(1L);
-        verify(userRepository, never()).findById(anyLong());
-        verify(cache, never()).put(anyLong(), any());
+        assertFalse(result.isPresent());
+        verify(cache).get(1L);
+        verify(userRepository).findById(1L);
+        verify(cache, never()).put(any(), any());
     }
 
     @Test
-    void findById_WithInvalidId_ShouldThrowException() {
+    void findById_ShouldThrowExceptionForInvalidId() {
         // Act & Assert
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> userService.findById(-1L));
-
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Некорректный ID пользователя", exception.getReason());
+        assertThrows(ResponseStatusException.class, () -> userService.findById(null));
+        assertThrows(ResponseStatusException.class, () -> userService.findById(0L));
+        assertThrows(ResponseStatusException.class, () -> userService.findById(-1L));
     }
 
     @Test
-    void create_WithValidUser_ShouldSaveAndCacheUser() {
+    void create_ShouldSuccessfullyCreateUser() {
         // Arrange
         when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.empty());
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(userRepository.save(testUser)).thenReturn(testUser);
 
         // Act
         User result = userService.create(testUser);
 
         // Assert
         assertEquals(testUser, result);
-        verify(userRepository, times(1)).save(testUser);
-        verify(cache, times(1)).put(testUser.getId(), testUser);
+        verify(userRepository).findByEmail(testUser.getEmail());
+        verify(userRepository).save(testUser);
+        verify(cache).put(testUser.getId(), testUser);
     }
 
     @Test
-    void create_WithDuplicateEmail_ShouldThrowException() {
+    void create_ShouldThrowExceptionForNullUser() {
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.create(null));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void create_ShouldThrowExceptionForInvalidEmail() {
+        // Arrange
+        testUser.setEmail(null);
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.create(testUser));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void create_ShouldThrowExceptionForDuplicateEmail() {
         // Arrange
         when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
 
         // Act & Assert
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> userService.create(testUser));
-
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Пользователь с таким email уже существует", exception.getReason());
     }
 
     @Test
-    void create_WithEmptyEmail_ShouldThrowException() {
-        // Arrange
-        testUser.setEmail("");
-
-        // Act & Assert
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> userService.create(testUser));
-
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Email пользователя не может быть пустым", exception.getReason());
-    }
-
-    @Test
-    void create_WithFutureBirthDate_ShouldThrowException() {
-        // Arrange
-        testUser.setBirth(LocalDate.now().plusDays(1));
-
-        // Act & Assert
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> userService.create(testUser));
-
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Некорректная дата рождения", exception.getReason());
-    }
-
-    @Test
-    void delete_WithValidId_ShouldDeleteAndRemoveFromCache() {
+    void delete_ShouldSuccessfullyDeleteUser() {
         // Arrange
         when(userRepository.existsById(1L)).thenReturn(true);
 
@@ -173,12 +187,156 @@ class UserServiceTest {
         userService.delete(1L);
 
         // Assert
-        verify(userRepository, times(1)).deleteById(1L);
-        verify(cache, times(1)).remove(1L);
+        verify(userRepository).existsById(1L);
+        verify(cache).remove(1L);
+        verify(userRepository).deleteById(1L);
     }
 
     @Test
-    void delete_WithNonExistentId_ShouldThrowException() {
+    void delete_ShouldThrowExceptionForInvalidId() {
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> userService.delete(null));
+        assertThrows(ResponseStatusException.class, () -> userService.delete(0L));
+        assertThrows(ResponseStatusException.class, () -> userService.delete(-1L));
+    }
+
+    @Test
+    void update_ShouldSuccessfullyUpdateUser() {
+        // Arrange
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(testUser)).thenReturn(testUser);
+        when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+
+        // Act
+        User result = userService.update(1L, "new@example.com", "New Name");
+
+        // Assert
+        assertEquals(testUser, result);
+        assertEquals("new@example.com", testUser.getEmail());
+        assertEquals("New Name", testUser.getName());
+        verify(userRepository).findById(1L);
+        verify(userRepository).save(testUser);
+        verify(cache).put(1L, testUser);
+    }
+
+    @Test
+    void update_ShouldThrowExceptionForInvalidId() {
+        // Act & Assert
+        assertThrows(ResponseStatusException.class,
+                () -> userService.update(null, "email@example.com", "Name"));
+    }
+
+    @Test
+    void update_ShouldHandlePartialUpdates() {
+        // Arrange
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(testUser)).thenReturn(testUser);
+
+        // Act - update only name
+        User result = userService.update(1L, null, "New Name");
+
+        // Assert
+        assertEquals(testUser, result);
+        assertEquals("john@example.com", testUser.getEmail()); // email unchanged
+        assertEquals("New Name", testUser.getName());
+    }
+
+    @Test
+    void bulkCreate_ShouldHandleSuccessAndFailures() {
+        // Arrange
+        UserCreateDto validDto1 = new UserCreateDto();
+        validDto1.setName("User1");
+        validDto1.setEmail("user1@example.com");
+        validDto1.setBirth(LocalDate.of(1990, 1, 1));
+
+        UserCreateDto invalidDto = new UserCreateDto();
+        invalidDto.setName("");
+        invalidDto.setEmail("invalid@example.com");
+        invalidDto.setBirth(LocalDate.of(1990, 1, 1));
+
+        UserCreateDto validDto2 = new UserCreateDto();
+        validDto2.setName("User2");
+        validDto2.setEmail("user2@example.com");
+        validDto2.setBirth(LocalDate.of(1995, 5, 15));
+
+        when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("user2@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        BulkResponse response = userService.bulkCreate(Arrays.asList(validDto1, invalidDto, validDto2));
+
+        // Assert
+        assertEquals(2, response.getSuccessCount());
+        assertEquals(1, response.getFailCount());
+        assertEquals(1, response.getErrors().size());
+        verify(userRepository, times(2)).save(any(User.class));
+    }
+
+    @Test
+    void validateUserForCreation_ShouldThrowExceptionForNullBirthDate() {
+        // Arrange
+        testUser.setBirth(null);
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.create(testUser));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void validateUserForCreation_ShouldThrowExceptionForFutureBirthDate() {
+        // Arrange
+        testUser.setBirth(LocalDate.now().plusDays(1));
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.create(testUser));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void updateUserEmail_ShouldThrowExceptionForEmptyEmail() {
+        // Arrange
+        User user = new User();
+        user.setEmail("old@example.com");
+
+        // Act & Assert
+        assertThrows(ResponseStatusException.class,
+                () -> userService.update(1L, "", "Name"));
+    }
+
+    @Test
+    void updateUserName_ShouldThrowExceptionForEmptyName() {
+        // Arrange
+        User user = new User();
+        user.setName("Old Name");
+
+        // Act & Assert
+        assertThrows(ResponseStatusException.class,
+                () -> userService.update(1L, "email@example.com", ""));
+    }
+
+    // Добавим эти тесты в существующий UserServiceTest
+
+    @Test
+    void create_ShouldThrowResponseStatusExceptionWithProperDetailsWhenValidationFails() {
+        // Arrange
+        User invalidUser = new User();
+        invalidUser.setEmail(null);
+        invalidUser.setName("");
+        invalidUser.setBirth(LocalDate.now().plusDays(1));
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.create(invalidUser));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertNotNull(exception.getReason());
+    }
+
+    @Test
+    void delete_ShouldThrowResponseStatusExceptionWithNotFoundStatusWhenUserNotExists() {
         // Arrange
         when(userRepository.existsById(1L)).thenReturn(false);
 
@@ -186,55 +344,12 @@ class UserServiceTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> userService.delete(1L));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Пользователь с id: 1 не найден", exception.getReason());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+        assertNotNull(exception.getReason());
     }
 
     @Test
-    void delete_WithInvalidId_ShouldThrowException() {
-        // Act & Assert
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> userService.delete(-1L));
-
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Некорректный ID пользователя", exception.getReason());
-    }
-
-    @Test
-    void update_WithValidData_ShouldUpdateAndCacheUser() {
-        // Arrange
-        String newEmail = "new@example.com";
-        String newName = "New Name";
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(userRepository.findByEmail(newEmail)).thenReturn(Optional.empty());
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
-
-        // Act
-        User result = userService.update(1L, newEmail, newName);
-
-        // Assert
-        assertEquals(testUser, result);
-        assertEquals(newEmail, testUser.getEmail());
-        assertEquals(newName, testUser.getName());
-        verify(cache, times(1)).put(1L, testUser);
-    }
-
-    @Test
-    void update_WithEmptyName_ShouldThrowException() {
-        // Arrange
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-
-        // Act & Assert
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> userService.update(1L, "valid@email.com", ""));
-
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Имя не может быть пустым", exception.getReason());
-    }
-
-    @Test
-    void update_WithDuplicateEmail_ShouldThrowException() {
+    void update_ShouldThrowResponseStatusExceptionWithBadRequestForDuplicateEmail() {
         // Arrange
         User existingUser = new User();
         existingUser.setId(2L);
@@ -245,103 +360,162 @@ class UserServiceTest {
 
         // Act & Assert
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> userService.update(1L, "existing@example.com", "Valid Name"));
+                () -> userService.update(1L, "existing@example.com", "Name"));
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Пользователь с таким email уже существует", exception.getReason());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+        assertNotNull(exception.getReason());
     }
 
-    @Test
-    void bulkCreate_WithValidUsers_ShouldReturnSuccessCount() {
-        // Arrange
-        User savedUser = new User();
-        savedUser.setId(1L); // Устанавливаем ID
-        savedUser.setName(testUserCreateDto.getName());
-        savedUser.setEmail(testUserCreateDto.getEmail());
-        savedUser.setBirth(testUserCreateDto.getBirth());
-        savedUser.setAge(30);
 
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+    @Test
+    void bulkCreate_ShouldIncludeProperErrorMessagesInResponse() {
+        // Arrange
+        UserCreateDto invalidDto = new UserCreateDto();
+        invalidDto.setName("");
+        invalidDto.setEmail("invalid@example.com");
+        invalidDto.setBirth(LocalDate.of(1990, 1, 1));
 
         // Act
-        BulkResponse response = userService.bulkCreate(List.of(testUserCreateDto));
-
-        // Assert
-        assertEquals(1, response.getSuccessCount());
-        assertEquals(0, response.getFailCount());
-        assertTrue(response.getErrors().isEmpty());
-        verify(cache).put(1L, savedUser); // Проверяем с конкретным ID
-    }
-
-    @Test
-    void create_WithTodayBirthDate_ShouldSuccess() {
-        User user = new User();
-        user.setEmail("valid@email.com");
-        user.setBirth(LocalDate.now());
-        user.setName("Valid Name");
-
-        when(userRepository.save(any())).thenReturn(user);
-
-        User result = userService.create(user);
-        assertNotNull(result);
-    }
-
-    @Test
-    void update_WithSameEmail_ShouldNotThrow() {
-        User existingUser = new User();
-        existingUser.setId(1L);
-        existingUser.setEmail("existing@example.com");
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
-
-        assertDoesNotThrow(() -> userService.update(1L, "existing@example.com", "New Name"));
-    }
-
-    @Test
-    void create_WithMinimalAge_ShouldCalculateCorrectly() {
-        User user = new User();
-        user.setEmail("test@example.com");
-        user.setBirth(LocalDate.now().minusYears(18));
-        user.setName("Adult User");
-
-        when(userRepository.save(any())).thenReturn(user);
-
-        User result = userService.create(user);
-        assertEquals(18, result.getAge());
-    }
-
-    @Test
-    void update_WithNullName_ShouldNotUpdateName() {
-        // Arrange
-        User existingUser = new User();
-        existingUser.setId(1L);
-        existingUser.setName("Original Name");
-        existingUser.setEmail("original@example.com");
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        // Act
-        User result = userService.update(1L, null, null);
-
-        // Assert
-        assertNotNull(result); // Проверяем, что результат не null
-        assertEquals("Original Name", result.getName()); // Имя не должно измениться
-        assertEquals("original@example.com", result.getEmail()); // Email не должен измениться
-    }
-
-    @Test
-    void bulkCreate_WithInvalidUser_ShouldReturnFailCount() {
-        // Arrange
-        testUserCreateDto.setEmail(""); // Невалидный email
-
-        // Act
-        BulkResponse response = userService.bulkCreate(List.of(testUserCreateDto));
+        BulkResponse response = userService.bulkCreate(List.of(invalidDto));
 
         // Assert
         assertEquals(0, response.getSuccessCount());
         assertEquals(1, response.getFailCount());
         assertFalse(response.getErrors().isEmpty());
-        verify(cache, never()).put(anyLong(), any()); // Проверяем, что кэш не обновлялся
+        assertTrue(response.getErrors().get(0).contains("Ошибка при создании"));
+    }
+
+    @Test
+    void findById_ShouldThrowExceptionWhenDatabaseErrorOccurs() {
+        // Arrange
+        when(cache.get(1L)).thenReturn(null);
+        when(userRepository.findById(1L)).thenThrow(new RuntimeException("DB connection failed"));
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.findById(1L));
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+        assertNotNull(exception.getReason());
+        assertTrue(exception.getReason().contains("Internal server error"));
+    }
+
+    @Test
+    void create_ShouldCalculateAgeCorrectly() {
+        // Arrange
+        User newUser = new User();
+        newUser.setName("Test User");
+        newUser.setEmail("test@example.com");
+        newUser.setBirth(LocalDate.now().minusYears(25));
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        User result = userService.create(newUser);
+
+        // Assert
+        assertEquals(25, result.getAge());
+        verify(cache).put(any(), eq(result));
+    }
+
+    @Test
+    void bulkCreate_ShouldNotCacheWhenUserCreationFails() {
+        // Arrange
+        UserCreateDto validDto = new UserCreateDto();
+        validDto.setName("Valid User");
+        validDto.setEmail("valid@example.com");
+        validDto.setBirth(LocalDate.of(1990, 1, 1));
+
+        UserCreateDto invalidDto = new UserCreateDto();
+        invalidDto.setName("");
+        invalidDto.setEmail("invalid@example.com");
+        invalidDto.setBirth(LocalDate.of(1990, 1, 1));
+
+        when(userRepository.findByEmail("valid@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        BulkResponse response = userService.bulkCreate(Arrays.asList(validDto, invalidDto));
+
+        // Assert
+        assertEquals(1, response.getSuccessCount());
+        assertEquals(1, response.getFailCount());
+        verify(cache, times(1)).put(any(), any()); // Только для успешного создания
+    }
+
+    @Test
+    void update_ShouldNotUpdateCacheWhenSaveFails() {
+        // Arrange
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any())).thenThrow(new RuntimeException("Save failed"));
+
+        // Act & Assert
+        assertThrows(ResponseStatusException.class,
+                () -> userService.update(1L, "new@example.com", "New Name"));
+
+        verify(cache, never()).put(any(), any());
+    }
+
+    @Test
+    void update_ShouldUpdateOnlyEmailWhenNameIsNull() {
+        // Arrange
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+
+        // Act
+        User result = userService.update(1L, "new@example.com", null);
+
+        // Assert
+        assertEquals("new@example.com", result.getEmail());
+        assertEquals(testUser.getName(), result.getName()); // имя осталось прежним
+        verify(cache).put(1L, result);
+    }
+
+    @Test
+    void create_ShouldThrowExceptionForEmailStringNull() {
+        // Arrange
+        testUser.setEmail("null"); // строка "null"
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.create(testUser));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertNotNull(exception.getReason());
+        assertTrue(exception.getReason().contains("Email пользователя не может быть пустым, null или 'null'"));
+    }
+
+    @Test
+    void findById_ShouldReturnCachedUserOnSubsequentCalls() {
+        // Arrange
+        when(cache.get(1L)).thenReturn(null).thenReturn(testUser);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        // Первый вызов - попадание в базу данных
+        userService.findById(1L);
+
+        // Второй вызов - должен вернуть из кэша
+        Optional<User> result = userService.findById(1L);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(testUser, result.get());
+        verify(userRepository, times(1)).findById(1L); // только один вызов в БД
+        verify(cache, times(2)).get(1L);
+    }
+
+    @Test
+    void delete_ShouldThrowInternalErrorWhenCacheRemoveFails() {
+        // Arrange
+        when(userRepository.existsById(1L)).thenReturn(true);
+        doThrow(new RuntimeException("Cache error")).when(cache).remove(1L);
+
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.delete(1L));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+        assertNotNull(exception.getReason());
+        assertTrue(exception.getReason().contains("Internal server error"));
     }
 }

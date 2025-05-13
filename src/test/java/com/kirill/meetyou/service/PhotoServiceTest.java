@@ -1,6 +1,5 @@
 package com.kirill.meetyou.service;
 
-import com.kirill.meetyou.exception.ResourceNotFoundException;
 import com.kirill.meetyou.model.Photo;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.PhotoRepository;
@@ -11,17 +10,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.MockedConstruction;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +35,7 @@ class PhotoServiceTest {
 
     private User testUser;
     private Photo testPhoto;
-    private Photo testMainPhoto;
+    private Photo mainPhoto;
 
     @BeforeEach
     void setUp() {
@@ -48,208 +45,313 @@ class PhotoServiceTest {
 
         testPhoto = new Photo();
         testPhoto.setId(1L);
-        testPhoto.setPhotoUrl("photo1.jpg");
-        testPhoto.setIsMainString("false");
+        testPhoto.setPhotoUrl("http://example.com/photo1.jpg");
         testPhoto.setUploadDate(LocalDate.now());
         testPhoto.setUser(testUser);
+        testPhoto.setIsMainString("false");
 
-        testMainPhoto = new Photo();
-        testMainPhoto.setId(2L);
-        testMainPhoto.setPhotoUrl("main.jpg");
-        testMainPhoto.setIsMainString("true");
-        testMainPhoto.setUploadDate(LocalDate.now());
-        testMainPhoto.setUser(testUser);
+        mainPhoto = new Photo();
+        mainPhoto.setId(2L);
+        mainPhoto.setPhotoUrl("http://example.com/main.jpg");
+        mainPhoto.setUploadDate(LocalDate.now());
+        mainPhoto.setUser(testUser);
+        mainPhoto.setIsMainString("true");
     }
 
     @Test
-    void addPhoto_ShouldSavePhoto() {
-        try (MockedConstruction<Photo> ignored = mockConstruction(Photo.class)) {
-            when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
-            when(photoRepository.save(any(Photo.class))).thenReturn(testPhoto);
+    void addPhoto_ShouldSuccessfullyAddPhoto() {
+        // Arrange
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(photoRepository.save(testPhoto)).thenReturn(testPhoto);
 
-            Photo result = photoService.addPhoto(1L, testPhoto);
-
-            assertNotNull(result);
-            assertEquals(testPhoto.getId(), result.getId());
-            verify(photoRepository).save(testPhoto);
-        }
-    }
-
-    @Test
-    void addPhoto_WithMainPhoto_ShouldClearPreviousMainPhotos() {
-        testPhoto.setIsMainString("true");
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
-        when(photoRepository.save(any(Photo.class))).thenReturn(testPhoto);
-
+        // Act
         Photo result = photoService.addPhoto(1L, testPhoto);
 
+        // Assert
+        assertNotNull(result);
+        assertEquals(testPhoto, result);
+        verify(photoRepository).save(testPhoto);
+    }
+
+    @Test
+    void addPhoto_ShouldClearMainPhotosWhenAddingNewMainPhoto() {
+        // Arrange
+        testPhoto.setIsMainString("true");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(photoRepository.save(testPhoto)).thenReturn(testPhoto);
+
+        // Act
+        Photo result = photoService.addPhoto(1L, testPhoto);
+
+        // Assert
+        assertNotNull(result);
         verify(photoRepository).clearMainPhotos(1L);
-        assertEquals("true", result.getIsMainString());
     }
 
     @Test
-    void addPhoto_UserNotFound_ShouldThrowException() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () ->
-                photoService.addPhoto(1L, testPhoto));
+    void addPhoto_ShouldThrowExceptionForInvalidUserId() {
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> photoService.addPhoto(null, testPhoto));
+        assertThrows(ResponseStatusException.class, () -> photoService.addPhoto(0L, testPhoto));
     }
 
     @Test
-    void getAllUserPhotos_ShouldReturnPhotos() {
-        List<Photo> photos = Arrays.asList(testPhoto, testMainPhoto);
-        when(photoRepository.findByUserId(anyLong())).thenReturn(photos);
+    void addPhoto_ShouldThrowExceptionForInvalidPhoto() {
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> photoService.addPhoto(1L, null));
 
+        Photo invalidPhoto = new Photo();
+        invalidPhoto.setPhotoUrl("");
+        assertThrows(ResponseStatusException.class, () -> photoService.addPhoto(1L, invalidPhoto));
+    }
+
+    @Test
+    void getAllUserPhotos_ShouldReturnPhotosList() {
+        // Arrange
+        when(photoRepository.findByUserId(1L)).thenReturn(List.of(testPhoto, mainPhoto));
+
+        // Act
         List<Photo> result = photoService.getAllUserPhotos(1L);
 
+        // Assert
         assertEquals(2, result.size());
-        verify(photoRepository).findByUserId(1L);
     }
 
     @Test
-    void getAllUserPhotos_NoPhotos_ShouldReturnEmptyList() {
-        when(photoRepository.findByUserId(anyLong())).thenReturn(Collections.emptyList());
+    void getAllUserPhotos_ShouldThrowExceptionForDatabaseError() {
+        // Arrange
+        when(photoRepository.findByUserId(1L)).thenThrow(new RuntimeException("DB error"));
 
-        List<Photo> result = photoService.getAllUserPhotos(1L);
-
-        assertTrue(result.isEmpty());
+        // Act & Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> photoService.getAllUserPhotos(1L));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
     }
 
     @Test
     void getPhotoById_ShouldReturnPhoto() {
-        when(photoRepository.findByIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(testPhoto));
+        // Arrange
+        when(photoRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testPhoto));
 
+        // Act
         Photo result = photoService.getPhotoById(1L, 1L);
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1L, result.getId());
+        assertEquals(testPhoto, result);
     }
 
     @Test
-    void getPhotoById_NotFound_ShouldThrowException() {
-        when(photoRepository.findByIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.empty());
+    void getPhotoById_ShouldThrowExceptionWhenPhotoNotFound() {
+        // Arrange
+        when(photoRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () ->
-                photoService.getPhotoById(1L, 1L));
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> photoService.getPhotoById(1L, 1L));
     }
 
     @Test
-    void updatePhoto_ShouldUpdateFields() {
+    void updatePhoto_ShouldUpdatePhotoDetails() {
+        // Arrange
         Photo updatedPhoto = new Photo();
-        updatedPhoto.setPhotoUrl("new.jpg");
+        updatedPhoto.setPhotoUrl("http://example.com/new.jpg");
         updatedPhoto.setIsMainString("true");
 
-        when(photoRepository.findByIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(testPhoto));
-        when(photoRepository.save(any(Photo.class))).thenReturn(testPhoto);
+        when(photoRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testPhoto));
+        when(photoRepository.save(any())).thenReturn(testPhoto);
 
+        // Act
         Photo result = photoService.updatePhoto(1L, 1L, updatedPhoto);
 
-        verify(photoRepository).clearMainPhotos(1L);
-        assertEquals("new.jpg", result.getPhotoUrl());
+        // Assert
+        assertEquals("http://example.com/new.jpg", result.getPhotoUrl());
         assertEquals("true", result.getIsMainString());
+        verify(photoRepository).clearMainPhotos(1L);
     }
 
     @Test
-    void updatePhoto_WithNullFields_ShouldNotUpdate() {
+    void updatePhoto_ShouldNotClearMainPhotosWhenNotChangingToMain() {
+        // Arrange
         Photo updatedPhoto = new Photo();
+        updatedPhoto.setPhotoUrl("http://example.com/new.jpg");
 
-        when(photoRepository.findByIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(testPhoto));
-        when(photoRepository.save(any(Photo.class))).thenReturn(testPhoto);
+        when(photoRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testPhoto));
+        when(photoRepository.save(any())).thenReturn(testPhoto);
 
-        Photo result = photoService.updatePhoto(1L, 1L, updatedPhoto);
+        // Act
+        photoService.updatePhoto(1L, 1L, updatedPhoto);
 
-        assertEquals("photo1.jpg", result.getPhotoUrl());
-        assertEquals("false", result.getIsMainString());
+        // Assert
+        verify(photoRepository, never()).clearMainPhotos(any());
     }
 
     @Test
-    void updatePhoto_NotFound_ShouldThrowException() {
-        when(photoRepository.findByIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.empty());
+    void deletePhoto_ShouldDeletePhotoAndSetNewMain() {
+        // Arrange
+        when(photoRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(mainPhoto));
 
-        assertThrows(ResourceNotFoundException.class, () ->
-                photoService.updatePhoto(1L, 1L, new Photo()));
-    }
-
-    @Test
-    void deletePhoto_ShouldDeleteAndSetNewMainIfNeeded() {
-        when(photoRepository.findByIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(testMainPhoto));
-
+        // Act
         photoService.deletePhoto(1L, 1L);
 
-        verify(photoRepository).delete(testMainPhoto);
+        // Assert
+        verify(photoRepository).delete(mainPhoto);
         verify(photoRepository).setNewestPhotoAsMain(1L);
     }
 
     @Test
-    void deletePhoto_NotMainPhoto_ShouldNotSetNewMain() {
-        when(photoRepository.findByIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(testPhoto));
+    void deletePhoto_ShouldNotSetNewMainWhenDeletingNonMainPhoto() {
+        // Arrange
+        when(photoRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testPhoto));
 
+        // Act
         photoService.deletePhoto(1L, 1L);
 
-        verify(photoRepository).delete(testPhoto);
-        verify(photoRepository, never()).setNewestPhotoAsMain(1L);
+        // Assert
+        verify(photoRepository, never()).setNewestPhotoAsMain(any());
     }
 
     @Test
-    void deletePhoto_NotFound_ShouldThrowException() {
-        when(photoRepository.findByIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () ->
-                photoService.deletePhoto(1L, 1L));
-    }
-
-    @Test
-    void addMultiplePhotos_ShouldSaveAllPhotos() {
-        List<Photo> photos = Arrays.asList(testPhoto, testMainPhoto);
-
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
-        when(photoRepository.saveAll(anyList())).thenReturn(photos);
-
-        List<Photo> result = photoService.addMultiplePhotos(1L, photos);
-
-        assertEquals(2, result.size());
-        verify(photoRepository).saveAll(photos);
-    }
-
-    @Test
-    void addMultiplePhotos_WithMainPhoto_ShouldClearPreviousMain() {
-        testPhoto.setIsMainString("true");
-        List<Photo> photos = List.of(testPhoto);
-
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
-        when(photoRepository.saveAll(anyList())).thenReturn(photos);
-
-        photoService.addMultiplePhotos(1L, photos);
-
-        verify(photoRepository).clearMainPhotos(1L);
-    }
-
-    @Test
-    void addMultiplePhotos_EmptyList_ShouldReturnEmptyList() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
-
+    void addMultiplePhotos_ShouldHandleEmptyList() {
+        // Act
         List<Photo> result = photoService.addMultiplePhotos(1L, Collections.emptyList());
 
+        // Assert
         assertTrue(result.isEmpty());
-        verify(photoRepository, never()).saveAll(anyList());
     }
 
     @Test
-    void setPhotoAsMain_ShouldUpdatePhoto() {
-        when(photoRepository.findByIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.of(testPhoto));
-        when(photoRepository.save(any(Photo.class))).thenReturn(testPhoto);
+    void addMultiplePhotos_ShouldThrowExceptionForNullList() {
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> photoService.addMultiplePhotos(1L, null));
+    }
 
+    @Test
+    void addMultiplePhotos_ShouldClearMainPhotosWhenAddingNewMain() {
+        // Arrange
+        mainPhoto.setId(null);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(photoRepository.saveAll(any())).thenReturn(List.of(mainPhoto));
+
+        // Act
+        photoService.addMultiplePhotos(1L, List.of(mainPhoto));
+
+        // Assert
+        verify(photoRepository).clearMainPhotos(1L);
+    }
+
+    @Test
+    void setPhotoAsMain_ShouldUpdatePhotoAndClearOthers() {
+        // Arrange
+        when(photoRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testPhoto));
+        when(photoRepository.save(testPhoto)).thenReturn(testPhoto);
+
+        // Act
         Photo result = photoService.setPhotoAsMain(1L, 1L);
 
-        verify(photoRepository).clearMainPhotos(1L);
+        // Assert
         assertEquals("true", result.getIsMainString());
+        verify(photoRepository).clearMainPhotos(1L);
     }
 
     @Test
-    void setPhotoAsMain_NotFound_ShouldThrowException() {
-        when(photoRepository.findByIdAndUserId(anyLong(), anyLong())).thenReturn(Optional.empty());
+    void updatePhoto_ShouldNotChangeUploadDateWhenNotProvided() {
+        // Arrange
+        LocalDate originalDate = testPhoto.getUploadDate();
+        Photo updatedPhoto = new Photo();
+        updatedPhoto.setPhotoUrl("http://example.com/new.jpg");
 
-        assertThrows(ResourceNotFoundException.class, () ->
-                photoService.setPhotoAsMain(1L, 1L));
+        when(photoRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testPhoto));
+        when(photoRepository.save(any())).thenReturn(testPhoto);
+
+        // Act
+        Photo result = photoService.updatePhoto(1L, 1L, updatedPhoto);
+
+        // Assert
+        assertEquals(originalDate, result.getUploadDate());
+    }
+
+    @Test
+    void updatePhoto_ShouldUpdateUploadDateWhenProvided() {
+        // Arrange
+        LocalDate newDate = LocalDate.now().minusDays(1);
+        Photo updatedPhoto = new Photo();
+        updatedPhoto.setUploadDate(newDate);
+        updatedPhoto.setPhotoUrl("http://example.com/photo.jpg"); // Добавляем обязательное поле
+
+        when(photoRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testPhoto));
+        when(photoRepository.save(any())).thenReturn(testPhoto);
+
+        // Act
+        Photo result = photoService.updatePhoto(1L, 1L, updatedPhoto);
+
+        // Assert
+        assertEquals(newDate, result.getUploadDate());
+    }
+
+    @Test
+    void addPhoto_ShouldSetMainPhotoCorrectly() {
+        // Arrange
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(photoRepository.save(mainPhoto)).thenReturn(mainPhoto);
+
+        // Act
+        Photo result = photoService.addPhoto(1L, mainPhoto);
+
+        // Assert
+        assertEquals("true", result.getIsMainString());
+        verify(photoRepository).clearMainPhotos(1L);
+    }
+
+    @Test
+    void addPhoto_ShouldNotClearMainPhotosForNonMainPhoto() {
+        // Arrange
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(photoRepository.save(testPhoto)).thenReturn(testPhoto);
+
+        // Act
+        Photo result = photoService.addPhoto(1L, testPhoto);
+
+        // Assert
+        assertEquals("false", result.getIsMainString());
+        verify(photoRepository, never()).clearMainPhotos(any());
+    }
+
+    @Test
+    void updatePhoto_ShouldUpdateOnlyIsMainField() {
+        // Arrange
+        Photo updatedPhoto = new Photo();
+        updatedPhoto.setIsMainString("true");
+        updatedPhoto.setPhotoUrl(testPhoto.getPhotoUrl()); // сохраняем оригинальный URL
+
+        when(photoRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(testPhoto));
+        when(photoRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        Photo result = photoService.updatePhoto(1L, 1L, updatedPhoto);
+
+        // Assert
+        assertEquals("true", result.getIsMainString());
+        assertEquals(testPhoto.getPhotoUrl(), result.getPhotoUrl());
+        verify(photoRepository).clearMainPhotos(1L);
+    }
+
+    @Test
+    void validatePhotoId_ShouldThrowExceptionForInvalidId() {
+        // Act & Assert
+        assertThrows(ResponseStatusException.class,
+                () -> photoService.getPhotoById(1L, null));
+        assertThrows(ResponseStatusException.class,
+                () -> photoService.getPhotoById(1L, 0L));
+    }
+
+    @Test
+    void addMultiplePhotos_ShouldThrowExceptionWhenDatabaseErrorOccurs() {
+        // Arrange
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(photoRepository.saveAll(any())).thenThrow(new RuntimeException("DB error"));
+
+        // Act & Assert
+        assertThrows(ResponseStatusException.class,
+                () -> photoService.addMultiplePhotos(1L, List.of(testPhoto)));
     }
 }
