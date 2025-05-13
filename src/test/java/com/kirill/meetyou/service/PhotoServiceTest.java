@@ -365,7 +365,9 @@ class PhotoServiceTest {
         when(photoRepository.saveAll(any())).thenThrow(new RuntimeException("DB error"));
 
         // Act & Assert
-        assertThrows(ResponseStatusException.class,
-                () -> photoService.addMultiplePhotos(1L, List.of(testPhoto)));
+        assertThrows(ResponseStatusException.class, () -> {
+            List<Photo> photos = List.of(testPhoto);
+            photoService.addMultiplePhotos(1L, photos);
+        });
     }
 }
