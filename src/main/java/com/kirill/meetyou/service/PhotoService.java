@@ -29,7 +29,8 @@ public class PhotoService {
             validatePhoto(photo);
 
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id: " + userId + " не найден"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Пользователь"
+                            + " с id: " + userId + " не найден"));
 
             if (isMainPhoto(photo)) {
                 log.debug("Очистка текущих главных фотографий для пользователя {}", userId);
@@ -44,8 +45,10 @@ public class PhotoService {
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Ошибка при добавлении фотографии для пользователя {}: {}", userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось добавить фотографию из-за некорректных данных или ошибки сервера");
+            log.error("Ошибка при добавлении "
+                    + "фотографии для пользователя {}: {}", userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Не удалось добавить фотографию из-за некорректных данных или ошибки сервера");
         }
     }
 
@@ -55,8 +58,10 @@ public class PhotoService {
             log.debug("Получение всех фотографий для пользователя {}", userId);
             return photoRepository.findByUserId(userId);
         } catch (Exception e) {
-            log.error("Ошибка при получении фотографий для пользователя {}: {}", userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось получить фотографии");
+            log.error("Ошибка при получении "
+                    + "фотографий для пользователя {}: {}", userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не"
+                    + " удалось получить фотографии");
         }
     }
 
@@ -66,11 +71,16 @@ public class PhotoService {
             validatePhotoId(photoId);
             log.debug("Получение фотографии {} для пользователя {}", photoId, userId);
             return photoRepository.findByIdAndUserId(photoId, userId)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Фотография с id: " + photoId + " для пользователя с id: " + userId + " не найдена"));
+                    .orElseThrow(() -> new
+                            ResourceNotFoundException(
+                            "Фотография с id: " + photoId
+                                    + " для пользователя с id: " + userId + " не найдена"));
         } catch (Exception e) {
-            log.error("Ошибка при получении фотографии {} для пользователя {}: {}", photoId, userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось получить фотографию");
+            log.error("Ошибка при получении "
+                    + "фотографии {} для пользователя {}:"
+                    + " {}", photoId, userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось"
+                    + " получить фотографию");
         }
     }
 
@@ -88,7 +98,8 @@ public class PhotoService {
                 photoRepository.clearMainPhotos(userId);
             }
 
-            if (photoDetails.getPhotoUrl() != null && !photoDetails.getPhotoUrl().trim().isEmpty()) {
+            if (photoDetails.getPhotoUrl() != null
+                    && !photoDetails.getPhotoUrl().trim().isEmpty()) {
                 photo.setPhotoUrl(photoDetails.getPhotoUrl());
             }
 
@@ -106,8 +117,10 @@ public class PhotoService {
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Ошибка при обновлении фотографии {} для пользователя {}: {}", photoId, userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось обновить фотографию из-за некорректных данных или ошибки сервера");
+            log.error("Ошибка при обновлении фотографии"
+                    + " {} для пользователя {}: {}", photoId, userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось"
+                    + " обновить фотографию из-за некорректных данных или ошибки сервера");
         }
     }
 
@@ -126,8 +139,11 @@ public class PhotoService {
             }
             log.info("Фотография {} успешно удалена для пользователя {}", photoId, userId);
         } catch (Exception e) {
-            log.error("Ошибка при удалении фотографии {} для пользователя {}: {}", photoId, userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось удалить фотографию");
+            log.error("Ошибка при удалении фотографии {} для"
+                    + " пользователя"
+                    + " {}: {}", photoId, userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось"
+                    + " удалить фотографию");
         }
     }
 
@@ -137,7 +153,8 @@ public class PhotoService {
             validateUserId(userId);
             if (photos == null) {
                 log.warn("Передан null список фотографий для пользователя {}", userId);
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Список фотографий не может быть null");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Список"
+                        + " фотографий не может быть null");
             }
             if (photos.isEmpty()) {
                 log.debug("Передан пустой список фотографий для пользователя {}", userId);
@@ -147,7 +164,8 @@ public class PhotoService {
             photos.forEach(this::validatePhoto);
 
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id: " + userId + " не найден"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Пользователь"
+                            + " с id: " + userId + " не найден"));
 
             boolean hasMainPhoto = photos.stream().anyMatch(this::isMainPhoto);
 
@@ -162,13 +180,16 @@ public class PhotoService {
             });
 
             List<Photo> savedPhotos = photoRepository.saveAll(photos);
-            log.info("Успешно добавлено {} фотографий для пользователя {}", savedPhotos.size(), userId);
+            log.info("Успешно добавлено {} фотографий"
+                    + " для пользователя {}", savedPhotos.size(), userId);
             return savedPhotos;
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Ошибка при добавлении нескольких фотографий для пользователя {}: {}", userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось добавить фотографии из-за некорректных данных или ошибки сервера");
+            log.error("Ошибка при добавлении нескольких фотографий"
+                    + " для пользователя {}: {}", userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось"
+                    + " добавить фотографии из-за некорректных данных или ошибки сервера");
         }
     }
 
@@ -188,15 +209,18 @@ public class PhotoService {
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Ошибка при установке фотографии {} как главной для пользователя {}: {}", photoId, userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось установить фотографию как главную");
+            log.error("Ошибка при установке фотографии {} как"
+                    + " главной для пользователя {}: {}", photoId, userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось "
+                    + "установить фотографию как главную");
         }
     }
 
     private void validateUserId(Long userId) {
         if (userId == null || userId <= 0) {
             log.warn("Некорректный ID пользователя: {}", userId);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный ID пользователя");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный"
+                    + " ID пользователя");
         }
     }
 
@@ -210,11 +234,13 @@ public class PhotoService {
     private void validatePhoto(Photo photo) {
         if (photo == null) {
             log.warn("Передана null фотография");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Объект фотографии не может быть null");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Объект"
+                    + " фотографии не может быть null");
         }
         if (photo.getPhotoUrl() == null || photo.getPhotoUrl().trim().isEmpty()) {
             log.warn("Пустой или null URL фотографии");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "URL фотографии не может быть пустым или null");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "URL фотографии "
+                    + "не может быть пустым или null");
         }
     }
 

@@ -33,7 +33,8 @@ public class UserService {
             return userRepository.findAll();
         } catch (Exception e) {
             log.error("Failed to fetch all users. Error: {}", e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error while fetching users");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal"
+                    + " server error while fetching users");
         }
     }
 
@@ -68,7 +69,8 @@ public class UserService {
             return userOptional;
         } catch (Exception e) {
             log.error("Failed to find user with ID: {}. Error: {}", id, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error while finding user");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal"
+                    + " server error while finding user");
         }
     }
 
@@ -89,8 +91,10 @@ public class UserService {
         } catch (ResponseStatusException e) {
             throw e; // Re-throw validation or known errors
         } catch (Exception e) {
-            log.error("Failed to create user with email: {}. Error: {}", user != null ? user.getEmail() : "null", e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось создать пользователя из-за некорректных данных или существующего email");
+            log.error("Failed to create user with email: {}. Error: {}",
+                    user != null ? user.getEmail() : "null", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось"
+                    + " создать пользователя из-за некорректных данных или существующего email");
         }
     }
 
@@ -112,7 +116,8 @@ public class UserService {
             log.info("Successfully deleted user: {}", id);
         } catch (Exception e) {
             log.error("Failed to delete user with ID: {}. Error: {}", id, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error while deleting user");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal"
+                    + " server error while deleting user");
         }
     }
 
@@ -143,17 +148,20 @@ public class UserService {
             return updatedUser;
         } catch (Exception e) {
             log.error("Failed to update user with ID: {}. Error: {}", id, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error while updating user");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal"
+                    + " server error while updating user");
         }
     }
 
     private void validateUserForCreation(User user) {
         if (user == null) {
             log.error("Attempt to create null user");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Объект пользователя не может быть null");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Объект"
+                    + " пользователя не может быть null");
         }
 
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty() || user.getEmail().trim().equalsIgnoreCase("null")) {
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()
+                || user.getEmail().trim().equalsIgnoreCase("null")) {
             log.error("Attempt to create user with null, empty, or 'null' email");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Email пользователя не может быть пустым, null или 'null'");
@@ -220,7 +228,8 @@ public class UserService {
         try {
             if (userDtos == null) {
                 log.error("Attempt to bulk create with null user DTO list");
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Список пользователей не может быть null");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Список "
+                        + "пользователей не может быть null");
             }
 
             BulkResponse.BulkResponseBuilder responseBuilder = BulkResponse.builder()
@@ -243,17 +252,20 @@ public class UserService {
                     responseBuilder.successCount(responseBuilder.build().getSuccessCount() + 1);
                 } catch (ResponseStatusException e) {
                     responseBuilder.failCount(responseBuilder.build().getFailCount() + 1);
-                    responseBuilder.errors(List.of("Ошибка при создании пользователя с email " + dto.getEmail() + ": " + e.getReason()));
+                    responseBuilder.errors(List.of("Ошибка при создании"
+                            + " пользователя с email " + dto.getEmail() + ": " + e.getReason()));
                 } catch (Exception e) {
                     responseBuilder.failCount(responseBuilder.build().getFailCount() + 1);
-                    responseBuilder.errors(List.of("Ошибка при создании пользователя с email " + dto.getEmail() + ": " + e.getMessage()));
+                    responseBuilder.errors(List.of("Ошибка при создании"
+                            + " пользователя с email " + dto.getEmail() + ": " + e.getMessage()));
                 }
             });
 
             return responseBuilder.build();
         } catch (Exception e) {
             log.error("Failed to bulk create users. Error: {}", e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error during bulk user creation");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server"
+                    + " error during bulk user creation");
         }
     }
 }
