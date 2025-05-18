@@ -1,14 +1,13 @@
 package com.kirill.meetyou.controller;
 
-import com.kirill.meetyou.dto.BulkCreateRequest;
 import com.kirill.meetyou.dto.BulkResponse;
+import com.kirill.meetyou.dto.UserCreateDto;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.UserRepository;
 import com.kirill.meetyou.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -66,9 +65,8 @@ public class UserController {
             description = "Создает несколько пользователей одновременно")
     @ApiResponse(responseCode = "201", description = "Пользователи успешно созданы")
     @PostMapping("/bulk")
-    public ResponseEntity<BulkResponse> bulkCreate(@RequestBody @Valid BulkCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.bulkCreate(request.getUsers()));
+    public BulkResponse bulkCreate(@RequestBody List<UserCreateDto> userDtos) {
+        return userService.bulkCreate(userDtos);
     }
 
     @Operation(summary = "Удалить пользователя",

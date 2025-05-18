@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/users/{userId}/photos")
@@ -28,18 +30,19 @@ public class PhotoController {
     private static final String ERROR_KEY = "error";
     private final PhotoService photoService;
 
-    @Operation(summary = "Добавить фотографию",
-            description = "Добавляет новую фотографию для указанного пользователя")
-    @ApiResponses({@ApiResponse(responseCode = "201",
-            description = "Фотография успешно добавлена"),
-        @ApiResponse(responseCode = "400", description = "Неверные параметры запроса")
+    @Operation(summary = "Добавить фотографию", description = "Загружает "
+            + "новую фотографию для указанного пользователя")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Фотография успешно добавлена"),
+        @ApiResponse(responseCode = "400", description = "Неверные параметры запроса или файл")
     })
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<Object> addPhoto(
             @PathVariable Long userId,
-            @RequestBody Photo photo) {
+            @RequestPart("file") MultipartFile file,
+            @RequestPart(value = "isMain", required = false) String isMain) {
         try {
-            Photo createdPhoto = photoService.addPhoto(userId, photo);
+            Photo createdPhoto = photoService.addPhoto(userId, file, isMain);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdPhoto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
@@ -47,18 +50,19 @@ public class PhotoController {
         }
     }
 
-    @Operation(summary = "Добавить несколько фотографий",
-            description = "Добавляет несколько фотографий для указанного пользователя")
+    @Operation(summary = "Добавить несколько фотографий", description = "Загружает"
+            + " несколько фотографий для указанного пользователя")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Фотографии успешно добавлены"),
-        @ApiResponse(responseCode = "400", description = "Неверные параметры запроса")
+        @ApiResponse(responseCode = "400", description = "Неверные параметры запроса или файлы")
     })
-    @PostMapping("/batch")
+    @PostMapping(value = "/batch", consumes = {"multipart/form-data"})
     public ResponseEntity<Object> addMultiplePhotos(
             @PathVariable Long userId,
-            @RequestBody List<Photo> photos) {
+            @RequestPart("files") List<MultipartFile> files,
+            @RequestPart(value = "isMain", required = false) String isMain) {
         try {
-            List<Photo> createdPhotos = photoService.addMultiplePhotos(userId, photos);
+            List<Photo> createdPhotos = photoService.addMultiplePhotos(userId, files, isMain);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdPhotos);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(

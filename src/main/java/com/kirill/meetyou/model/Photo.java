@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,11 +26,12 @@ public class Photo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @Column(name = "photo_url")
     private String photoUrl;
 
     @Column(name = "is_main", nullable = false)
-    private String isMain;  // Хранит "true" или "false" как String
+    private String isMain = "false";
 
     @Column(nullable = false)
     private LocalDate uploadDate;
@@ -39,7 +41,6 @@ public class Photo {
     @JsonBackReference
     private User user;
 
-    //     Дополнительные методы для прямого доступа к строковому значению
     @JsonIgnore
     public String getIsMainString() {
         return this.isMain;

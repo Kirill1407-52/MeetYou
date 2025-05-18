@@ -5,51 +5,84 @@ import com.kirill.meetyou.model.Photo;
 import com.kirill.meetyou.model.User;
 import com.kirill.meetyou.repository.PhotoRepository;
 import com.kirill.meetyou.repository.UserRepository;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PhotoService {
-    private static final String CLEAR_MAIN_PHOTOS_LOG = "Очистка текущих главных фотографий для пользователя {}";
+    private static final String CLEAR_MAIN_PHOTOS_LOG = "Очистка"
+            + " текущих главных фотографий для пользователя {}";
+    private static final String UPLOAD_DIR = ""
+            + "/home/kirill/Изображения/"; // Папка для хранения файлов
     private final PhotoRepository photoRepository;
     private final UserRepository userRepository;
 
     @Transactional
-    public Photo addPhoto(Long userId, Photo photo) {
+    public Photo addPhoto(Long userId, MultipartFile file, String isMain) {
         try {
             validateUserId(userId);
-            validatePhoto(photo);
+            validateFile(file);
 
-            User user = userRepository.findById(userId)
+            User user;
+            user = userRepository.findById(userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Пользователь"
                             + " с id: " + userId + " не найден"));
+
+            // Валидация isMain
+            if (isMain != null && !isMain.equals("true") && !isMain.equals("false")) {
+                log.warn("Некорректное значение isMain: {}", isMain);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "isMain должен быть"
+                        + " 'true' или 'false'");
+            }
+
+            // Сохранение файла
+            String fileName = saveFile(file);
+            String photoUrl = "/home/kirill/Изображения/" + fileName;
+
+            Photo photo = new Photo();
+            photo.setPhotoUrl(photoUrl);
+            photo.setIsMainString(isMain != null && isMain.equals("true") ? "true" : "false");
+            photo.setUploadDate(LocalDate.now());
+            photo.setUser(user);
 
             if (isMainPhoto(photo)) {
                 log.debug(CLEAR_MAIN_PHOTOS_LOG, userId);
                 photoRepository.clearMainPhotos(userId);
             }
 
-            photo.setUser(user);
-            photo.setUploadDate(LocalDate.now());
             Photo savedPhoto = photoRepository.save(photo);
             log.info("Фотография успешно добавлена для пользователя {}", userId);
             return savedPhoto;
+        } catch (IOException e) {
+            log.error("Ошибка при сохранении файла "
+                    + "для пользователя {}: {}", userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось "
+                    + "сохранить файл: " + e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Ошибка при добавлении "
+            log.error("Неизвестная ошибка при добавлении "
                     + "фотографии для пользователя {}: {}", userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Не удалось добавить фотографию из-за некорректных данных или ошибки сервера");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось "
+                    + "добавить фотографию");
         }
     }
 
@@ -57,12 +90,18 @@ public class PhotoService {
         try {
             validateUserId(userId);
             log.debug("Получение всех фотографий для пользователя {}", userId);
-            return photoRepository.findByUserId(userId);
+            List<Photo> photos = photoRepository.findByUserId(userId);
+            if (photos.isEmpty()) {
+                log.info("Фотографии для пользователя {} не найдены", userId);
+            }
+            return photos;
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("Ошибка при получении "
-                    + "фотографий для пользователя {}: {}", userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не"
-                    + " удалось получить фотографии");
+            log.error("Ошибка базы данных при получении фотографий"
+                    + " для пользователя {}: {}", userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось"
+                    + " получить фотографии: " + e.getMessage());
         }
     }
 
@@ -72,14 +111,12 @@ public class PhotoService {
             validatePhotoId(photoId);
             log.debug("Получение фотографии {} для пользователя {}", photoId, userId);
             return photoRepository.findByIdAndUserId(photoId, userId)
-                    .orElseThrow(() -> new
-                            ResourceNotFoundException(
-                            "Фотография с id: " + photoId
-                                    + " для пользователя с id: " + userId + " не найдена"));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Фотография с id: " + photoId + " для пользователя"
+                                    + " с id: " + userId + " не найдена"));
         } catch (Exception e) {
-            log.error("Ошибка при получении "
-                    + "фотографии {} для пользователя {}:"
-                    + " {}", photoId, userId, e.getMessage(), e);
+            log.error("Ошибка при получении фотографии"
+                    + " {} для пользователя {}: {}", photoId, userId, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось"
                     + " получить фотографию");
         }
@@ -118,10 +155,10 @@ public class PhotoService {
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Ошибка при обновлении фотографии"
-                    + " {} для пользователя {}: {}", photoId, userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось"
-                    + " обновить фотографию из-за некорректных данных или ошибки сервера");
+            log.error("Ошибка при обновлении "
+                    + "фотографии {} для пользователя {}: {}", photoId, userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось "
+                    + "обновить фотографию из-за некорректных данных или ошибки сервера");
         }
     }
 
@@ -132,65 +169,151 @@ public class PhotoService {
             validatePhotoId(photoId);
 
             Photo photo = getPhotoById(userId, photoId);
+
+            // Удаление физического файла
+            String photoUrl = photo.getPhotoUrl();
+            if (photoUrl != null && !photoUrl.isEmpty()) {
+                Path filePath = Paths.get(photoUrl);
+                try {
+                    if (Files.exists(filePath)) {
+                        Files.delete(filePath);
+                        log.info("Файл {} успешно удален из хранилища", photoUrl);
+                    } else {
+                        log.warn("Файл {} не найден в хранилище", photoUrl);
+                    }
+                } catch (IOException e) {
+                    log.error("Ошибка при удалении файла {}: {}", photoUrl, e.getMessage(), e);
+                    // Продолжаем удаление из базы, даже если файл не удалось удалить
+                }
+            }
+
             photoRepository.delete(photo);
 
+            // Проверка, была ли фотография основной
             if (isMainPhoto(photo)) {
-                log.debug("Установка новой главной фотографии для пользователя {}", userId);
-                photoRepository.setNewestPhotoAsMain(userId);
+                log.debug("Удалена основная фотография для пользователя {}", userId);
+                // Не устанавливаем новую основную фотографию автоматически
+                // Если нужно, можно раскомментировать следующую строку:
+                // photoRepository.setNewestPhotoAsMain(userId);
             }
+
             log.info("Фотография {} успешно удалена для пользователя {}", photoId, userId);
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("Ошибка при удалении фотографии {} для"
-                    + " пользователя"
-                    + " {}: {}", photoId, userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось"
-                    + " удалить фотографию");
+            log.error("Ошибка при удалении "
+                    + "фотографии {} для пользователя {}: {}", photoId, userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось "
+                    + "удалить фотографию: " + e.getMessage());
         }
     }
 
     @Transactional
-    public List<Photo> addMultiplePhotos(Long userId, List<Photo> photos) {
+    public List<Photo> addMultiplePhotos(Long userId, List<MultipartFile> files, String isMain) {
         try {
             validateUserId(userId);
-            if (photos == null) {
-                log.warn("Передан null список фотографий для пользователя {}", userId);
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Список"
-                        + " фотографий не может быть null");
-            }
-            if (photos.isEmpty()) {
-                log.debug("Передан пустой список фотографий для пользователя {}", userId);
+            if (files == null || files.isEmpty()) {
+                log.debug("Передан пустой список "
+                        + "файлов для пользователя {}", userId);
                 return Collections.emptyList();
             }
 
-            photos.forEach(this::validatePhoto);
+            // Валидация isMain
+            if (isMain != null && !isMain.equals("true")
+                    && !isMain.equals("false")) {
+                log.warn("Некорректное значение isMain: {}", isMain);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "isMain должен "
+                        + "быть 'true' или 'false'");
+            }
 
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Пользователь"
                             + " с id: " + userId + " не найден"));
 
-            boolean hasMainPhoto = photos.stream().anyMatch(this::isMainPhoto);
-
+            boolean hasMainPhoto = isMain != null && isMain.equals("true");
             if (hasMainPhoto) {
                 log.debug(CLEAR_MAIN_PHOTOS_LOG, userId);
                 photoRepository.clearMainPhotos(userId);
             }
 
-            photos.forEach(photo -> {
-                photo.setUser(user);
-                photo.setUploadDate(LocalDate.now());
-            });
+            List<Photo> photos = new ArrayList<>();
+            List<String> failedFiles = new ArrayList<>();
 
-            List<Photo> savedPhotos = photoRepository.saveAll(photos);
-            log.info("Успешно добавлено {} фотографий"
-                    + " для пользователя {}", savedPhotos.size(), userId);
-            return savedPhotos;
+            for (int i = 0; i < files.size(); i++) {
+                MultipartFile file = files.get(i);
+                try {
+                    validateFile(file);
+                    String fileName = saveFile(file);
+                    String photoUrl = "/home/kirill/Изображения/" + fileName;
+
+                    Photo photo = new Photo();
+                    photo.setPhotoUrl(photoUrl);
+                    photo.setIsMainString(hasMainPhoto && i == 0 ? "true" : "false");
+                    photo.setUploadDate(LocalDate.now());
+                    photo.setUser(user);
+                    photos.add(photo);
+                } catch (IOException e) {
+                    log.error("Ошибка при сохранении"
+                            + " файла {} для "
+                            + "пользователя {}: {}", file.getOriginalFilename(),
+                            userId, e.getMessage());
+                    failedFiles.add(file.getOriginalFilename());
+                } catch (ResponseStatusException e) {
+                    log.error("Некорректный файл {} для"
+                            + " пользователя {}: {}", file.getOriginalFilename(),
+                            userId, e.getMessage());
+                    failedFiles.add(file.getOriginalFilename());
+                }
+            }
+
+            if (!photos.isEmpty()) {
+                List<Photo> savedPhotos = photoRepository.saveAll(photos);
+                log.info("Успешно добавлено {} фотографий "
+                        + "для пользователя {}", savedPhotos.size(), userId);
+                if (!failedFiles.isEmpty()) {
+                    log.warn("Не удалось сохранить файлы: {}", failedFiles);
+                    throw new ResponseStatusException(HttpStatus.PARTIAL_CONTENT, "Частично"
+                            + " добавлены фотографии, не удалось сохранить: " + failedFiles);
+                }
+                return savedPhotos;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось"
+                        + " сохранить ни один файл: " + failedFiles);
+            }
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Ошибка при добавлении нескольких фотографий"
-                    + " для пользователя {}: {}", userId, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось"
-                    + " добавить фотографии из-за некорректных данных или ошибки сервера");
+            log.error("Неизвестная ошибка при добавлении "
+                    + "нескольких фотографий для пользователя {}: {}", userId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не "
+                    + "удалось добавить фотографии");
+        }
+    }
+
+    private String saveFile(MultipartFile file) throws IOException {
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path uploadPath = Paths.get(UPLOAD_DIR);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        Path filePath = uploadPath.resolve(fileName);
+        Files.write(filePath, file.getBytes());
+        return fileName;
+    }
+
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            log.warn("Передан пустой или null файл");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Файл "
+                    + "не может быть пустым или null");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            log.warn("Недопустимый тип файла: {}", contentType);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Файл "
+                    + "должен быть изображением");
         }
     }
 
@@ -210,8 +333,8 @@ public class PhotoService {
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Ошибка при установке фотографии {} как"
-                    + " главной для пользователя {}: {}", photoId, userId, e.getMessage(), e);
+            log.error("Ошибка при установке фотографии {} как главной "
+                    + "для пользователя {}: {}", photoId, userId, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось "
                     + "установить фотографию как главную");
         }
@@ -240,8 +363,8 @@ public class PhotoService {
         }
         if (photo.getPhotoUrl() == null || photo.getPhotoUrl().trim().isEmpty()) {
             log.warn("Пустой или null URL фотографии");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "URL фотографии "
-                    + "не может быть пустым или null");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "URL фотографии"
+                    + " не может быть пустым или null");
         }
     }
 
