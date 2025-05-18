@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -27,6 +28,14 @@ public class LogService {
 
     @Value("${logging.file.path:./logs}")
     private String logDirectory;
+
+    // Self-injection
+    private LogService self;
+
+    @Autowired
+    public void setSelf(LogService self) {
+        this.self = self;
+    }
 
     @PostConstruct
     public void init() {
@@ -73,7 +82,8 @@ public class LogService {
     public String createLogTask() {
         String taskId = UUID.randomUUID().toString();
         taskStatusMap.put(taskId, "PENDING");
-        processLogCreation(taskId);
+        // Call through the self-injected proxy
+        self.processLogCreation(taskId);
         return taskId;
     }
 
