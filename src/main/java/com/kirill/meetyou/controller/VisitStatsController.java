@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/visits")
-@Tag(name = "Администрирование  проектов", description = "Создание, редактирование и удаление печей")
+@Tag(name = "Администрирование  проектов", description = "Создание,"
+        + " редактирование и удаление печей")
 public class VisitStatsController {
     private final VisitCounterService visitCounterService;
 

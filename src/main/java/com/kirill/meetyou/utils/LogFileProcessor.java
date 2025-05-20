@@ -22,7 +22,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class LogFileProcessor {
     @Async
-    public void processRange(String fromDate, String toDate, String taskId, Map<String, LogTask> tasks) {
+    public void processRange(String fromDate, String toDate, String taskId,
+                             Map<String, LogTask> tasks) {
         LogTask task = tasks.get(taskId);
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

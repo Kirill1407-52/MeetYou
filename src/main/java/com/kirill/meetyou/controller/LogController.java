@@ -5,6 +5,7 @@ import com.kirill.meetyou.enums.LogTaskStatus;
 import com.kirill.meetyou.service.LogGenerationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,7 +13,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -34,10 +34,12 @@ public class LogController {
     private final LogGenerationService service;
     private static final String LOGS_DIR = "logs/"; // Добавьте это в константы
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(""
+            + "yyyy-MM-dd");
 
     @Operation(summary = "Получить лог-файл по дате",
-            description = "Возвращает .log файл, сформированный в указанный день (формат: yyyy-MM-dd)")
+            description = "Возвращает .log файл, сформированный"
+                    + " в указанный день (формат: yyyy-MM-dd)")
     @GetMapping("/{date}")
     public ResponseEntity<InputStreamResource> getLogsByDate(
             @PathVariable String date) {
@@ -56,10 +58,12 @@ public class LogController {
                 return ResponseEntity.notFound().build();
             }
 
-            InputStreamResource resource = new InputStreamResource(new FileInputStream(path.toFile()));
+            InputStreamResource resource =
+                    new InputStreamResource(new FileInputStream(path.toFile()));
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + path.getFileName())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;"
+                            + " filename=" + path.getFileName())
                     .contentType(MediaType.TEXT_PLAIN)
                     .body(resource);
         } catch (Exception e) {
@@ -95,7 +99,9 @@ public class LogController {
     @GetMapping("/status/{id}")
     public ResponseEntity<LogTask> getStatus(@PathVariable String id) {
         LogTask task = service.getStatus(id);
-        if (task == null) return ResponseEntity.notFound().build();
+        if (task == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(task);
     }
 
@@ -118,7 +124,8 @@ public class LogController {
             }
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + path.getFileName())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;"
+                            + " filename=" + path.getFileName())
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(new InputStreamResource(new FileInputStream(path.toFile())));
         } catch (Exception e) {
