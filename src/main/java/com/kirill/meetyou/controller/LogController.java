@@ -1,17 +1,21 @@
 package com.kirill.meetyou.controller;
 
-import com.kirill.meetyou.service.LogService;
+import com.kirill.meetyou.dto.LogTask;
+import com.kirill.meetyou.enums.LogTaskStatus;
+import com.kirill.meetyou.service.LogGenerationService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,81 +26,104 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/logs")
-@Tag(name = "Log Management", description = "API для управления логами приложения")
+@RequestMapping("/logs")
+@RequiredArgsConstructor
+@Tag(name = "Логирование", description = "Эндпоинты для получения лог-файлов")
 @Slf4j
 public class LogController {
+    private final LogGenerationService service;
+    private static final String LOGS_DIR = "logs/"; // Добавьте это в константы
 
-    private final LogService logService;
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public LogController(LogService logService) {
-        this.logService = logService;
-    }
-
-    @Operation(
-            summary = "Загрузить лог по дате",
-            description = "Позволяет скачать лог-файл за указанную дату в формате yyyy-MM-dd"
-    )
-    @ApiResponses({@ApiResponse(
-                    responseCode = "200",
-                    description = "Лог-файл успешно загружен"
-            ), @ApiResponse(
-                    responseCode = "404",
-                    description = "Лог-файл не найден"
-            ), @ApiResponse(
-                    responseCode = "500",
-                    description = "Внутренняя ошибка сервера"
-            )
-    })
+    @Operation(summary = "Получить лог-файл по дате",
+            description = "Возвращает .log файл, сформированный в указанный день (формат: yyyy-MM-dd)")
     @GetMapping("/{date}")
-    public ResponseEntity<Resource> downloadLog(
-            @Parameter(description = "Дата лог-файла в формате yyyy-MM-dd", example = "2023-12-01")
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-
+    public ResponseEntity<InputStreamResource> getLogsByDate(
+            @PathVariable String date) {
         try {
-            Resource resource = logService.getLogFileByDate(date);
-            String filename = String.format("meetyou-app-%s.log", date);
+            LocalDate localDate = LocalDate.parse(date, DATE_FORMATTER);
+            Path path = Paths.get(LOGS_DIR + "app-" + DATE_FORMATTER.format(localDate) + ".log")
+                    .toAbsolutePath()
+                    .normalize();
 
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=" + filename)
-                    .body(resource);
+            // Проверка, что путь находится в разрешённой директории
+            if (!path.startsWith(Paths.get(LOGS_DIR).toAbsolutePath())) {
+                return ResponseEntity.badRequest().build();
+            }
 
-        } catch (IOException e) {
-            if (e.getMessage().equals("Log file not found or not readable")) {
-                log.warn("Log file not found for date: {}", date);
+            if (!Files.exists(path)) {
                 return ResponseEntity.notFound().build();
             }
-            log.error("Error while getting log file", e);
+
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(path.toFile()));
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + path.getFileName())
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body(resource);
+        } catch (Exception e) {
+            log.error("Ошибка при получении логов: {}", e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    @Operation(summary = "Создать лог-файл асинхронно")
-    @PostMapping
-    public ResponseEntity<Map<String, String>> createLog() {
-        String taskId = logService.createLogTask();
-        return ResponseEntity.accepted().body(Map.of("taskId", taskId));
+    @PostConstruct
+    public void init() {
+        try {
+            Files.createDirectories(Paths.get("logs"));
+            log.info("Директория для логов создана");
+        } catch (IOException e) {
+            log.error("Ошибка при создании директории логов: {}", e.getMessage());
+        }
     }
 
-    @Operation(summary = "Проверить статус задачи")
-    @GetMapping("/status/{taskId}")
-    public ResponseEntity<Map<String, String>> getTaskStatus(
-            @PathVariable String taskId) {
-        String status = logService.getTaskStatus(taskId);
-        return ResponseEntity.ok(Map.of("status", status));
+    @Operation(summary = "Запустить асинхронную генерацию логов")
+    @PostMapping("/{from}/{to}")
+    public ResponseEntity<String> startGeneration(
+            @PathVariable String from,
+            @PathVariable String to) {
+        try {
+            String id = service.startTask(from, to);
+            return ResponseEntity.ok(id);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Ошибка: " + e.getMessage());
+        }
     }
 
-    @Operation(summary = "Скачать лог-файл по ID задачи")
-    @GetMapping("/download/{taskId}")
-    public ResponseEntity<Resource> downloadLogByTaskId(
-            @PathVariable String taskId) throws IOException {
-        Resource resource = logService.getLogFileByTaskId(taskId);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=meetyou-log-" + taskId + ".log")
-                .body(resource);
+    @Operation(summary = "Получить статус задачи генерации логов")
+    @GetMapping("/status/{id}")
+    public ResponseEntity<LogTask> getStatus(@PathVariable String id) {
+        LogTask task = service.getStatus(id);
+        if (task == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(task);
+    }
+
+    @Operation(summary = "Скачать сгенерированный лог")
+    @GetMapping("/result/{id}")
+    public ResponseEntity<InputStreamResource> getFile(@PathVariable String id) {
+        LogTask task = service.getStatus(id);
+
+        if (task == null || task.getStatus() != LogTaskStatus.SUCCESS) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            Path path = Paths.get(task.getFilePath()).toAbsolutePath().normalize();
+
+            // Проверка существования файла
+            if (!Files.exists(path)) {
+                log.error("Файл не найден: {}", path);
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + path.getFileName())
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(new InputStreamResource(new FileInputStream(path.toFile())));
+        } catch (Exception e) {
+            log.error("Ошибка при скачивании файла: {}", e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
