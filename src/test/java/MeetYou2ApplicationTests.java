@@ -1,1 +1,1 @@
-package com.kirill.meetyou;
+package com.kirill.meetyou.service;

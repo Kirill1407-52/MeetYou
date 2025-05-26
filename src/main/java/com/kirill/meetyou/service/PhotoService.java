@@ -36,30 +36,7 @@ public class PhotoService {
     @Transactional
     public Photo addPhoto(Long userId, MultipartFile file, String isMain) {
         try {
-            validateUserId(userId);
-            validateFile(file);
-            validateIsMain(isMain);
-
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id: " + userId + " не найден"));
-
-            String fileName = saveFile(file);
-            String photoUrl = UPLOAD_DIR + fileName;
-
-            Photo photo = new Photo();
-            photo.setPhotoUrl(photoUrl);
-            photo.setIsMainString(isMain != null && isMain.equals(IS_MAIN_TRUE) ? IS_MAIN_TRUE : IS_MAIN_FALSE);
-            photo.setUploadDate(LocalDate.now());
-            photo.setUser(user);
-
-            if (isMainPhoto(photo)) {
-                log.debug(CLEAR_MAIN_PHOTOS_LOG, userId);
-                photoRepository.clearMainPhotos(userId);
-            }
-
-            Photo savedPhoto = photoRepository.save(photo);
-            log.info("Фотография успешно добавлена для пользователя {}", userId);
-            return savedPhoto;
+            return addPhotoInternal(userId, file, isMain);
         } catch (IOException e) {
             log.error("Ошибка при сохранении файла для пользователя {}: {}", userId, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось сохранить файл: " + e.getMessage());
@@ -69,6 +46,33 @@ public class PhotoService {
             log.error("Неизвестная ошибка при добавлении фотографии для пользователя {}: {}", userId, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось добавить фотографию");
         }
+    }
+
+    private Photo addPhotoInternal(Long userId, MultipartFile file, String isMain) throws IOException {
+        validateUserId(userId);
+        validateFile(file);
+        validateIsMain(isMain);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id: " + userId + " не найден"));
+
+        String fileName = saveFile(file);
+        String photoUrl = UPLOAD_DIR + fileName;
+
+        Photo photo = new Photo();
+        photo.setPhotoUrl(photoUrl);
+        photo.setIsMainString(isMain != null && isMain.equals(IS_MAIN_TRUE) ? IS_MAIN_TRUE : IS_MAIN_FALSE);
+        photo.setUploadDate(LocalDate.now());
+        photo.setUser(user);
+
+        if (isMainPhoto(photo)) {
+            log.debug(CLEAR_MAIN_PHOTOS_LOG, userId);
+            photoRepository.clearMainPhotos(userId);
+        }
+
+        Photo savedPhoto = photoRepository.save(photo);
+        log.info("Фотография успешно добавлена для пользователя {}", userId);
+        return savedPhoto;
     }
 
     public List<Photo> getAllUserPhotos(Long userId) {
@@ -95,7 +99,7 @@ public class PhotoService {
             log.debug("Получение фотографии {} для пользователя {}", photoId, userId);
             return photoRepository.findByIdAndUserId(photoId, userId)
                     .orElseThrow(() -> new ResourceNotFoundException(
-                            "Фотография с id: " + photoId + " для пользователя с id: " + userId + " не найдена"));
+                            "ФотографияФотография с id: " + photoId + " для пользователя с id: " + userId + " не найдена"));
         } catch (Exception e) {
             log.error("Ошибка при получении фотографии {} для пользователя {}: {}", photoId, userId, e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось получить фотографию");
@@ -149,7 +153,7 @@ public class PhotoService {
 
             String photoUrl = photo.getPhotoUrl();
             if (photoUrl != null && !photoUrl.isEmpty()) {
-                Path filePath = Paths.get(photoUrl);
+                Path filePath = Paths.get(UPLOAD_DIR, photoUrl);
                 try {
                     if (Files.exists(filePath)) {
                         Files.delete(filePath);
@@ -211,7 +215,7 @@ public class PhotoService {
 
         for (int i = 0; i < files.size(); i++) {
             try {
-                processSinglePhoto(userId, files.get(i), user, hasMainPhoto, i, photos);
+                processSinglePhoto(files.get(i), user, hasMainPhoto, i, photos);
             } catch (ResponseStatusException | IOException e) {
                 log.error("Ошибка при сохранении файла {} для пользователя {}: {}", files.get(i).getOriginalFilename(), userId, e.getMessage());
                 failedFiles.add(files.get(i).getOriginalFilename());
@@ -230,7 +234,7 @@ public class PhotoService {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось сохранить ни один файл: " + failedFiles);
     }
 
-    private void processSinglePhoto(Long userId, MultipartFile file, User user, boolean hasMainPhoto, int index, List<Photo> photos) throws IOException {
+    private void processSinglePhoto(MultipartFile file, User user, boolean hasMainPhoto, int index, List<Photo> photos) throws IOException {
         validateFile(file);
         String fileName = saveFile(file);
         String photoUrl = UPLOAD_DIR + fileName;
